@@ -1,0 +1,6 @@
+error.log
+.vscode
+.pytest_cache
+__pycache__/
+*.py[cod]
+docker
