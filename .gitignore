@@ -4,3 +4,4 @@ error.log
 __pycache__/
 *.py[cod]
 docker
+tailored_feed_env
