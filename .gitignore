@@ -5,3 +5,4 @@ __pycache__/
 *.py[cod]
 docker
 tailored_feed_env
+tailored_feed/migrations
