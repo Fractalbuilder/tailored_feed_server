@@ -83,8 +83,10 @@ DATABASES = {
         'NAME': 'tailored_feed',
         'USER': 'postgres',
         'PASSWORD': 'tailoredpass',
-        'HOST': 'tailored_feed_db',
-        'PORT': '5432',
+        #'HOST': 'tailored_feed_db',
+        'HOST': 'localhost',
+        #'PORT': '5432',
+        'PORT': '5435',
     }
 }
 
@@ -134,8 +136,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://tailored_feed_redis:6379/0',
-        #'LOCATION': 'redis://localhost:6379/0',
+        #'LOCATION': 'redis://tailored_feed_redis:6379/0',
+        'LOCATION': 'redis://localhost:6381/0',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
@@ -160,3 +162,4 @@ REST_FRAMEWORK = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+LOGIN_URL = '/login/'
