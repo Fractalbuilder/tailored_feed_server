@@ -1,0 +1,112 @@
+{% extends "common/layout.html" %}
+{% load static %}
+
+{% block body %}
+    {% if messages %}
+    <div class="messages-container">
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div id="main-container">
+        <h1>Evaluaciones</h1>
+
+        <form id="addAssessmentForm" action="{% url 'add_assessment' %}" method="post">
+            {% csrf_token %}
+            <input id="addAssessmentFormNameInput" type="text" name="name" placeholder="Nombre" autofocus>
+            <button class="common-button" type="submit">Crear</button>
+            <span id="addAssessmentFormNameError" class="common-text" style="display:none;"></span>
+        </form>
+
+        <br>
+        <hr>
+        {% if not assessments %}
+            <p class="common-text">No hay evaluaciones aún</p>
+        {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 50%;">Nombre</th>
+                    <th style="width: 15%;">Acciones Preguntas</th>
+                    <th style="width: 10%;">Acciones Sesión</th>
+                    <th style="width: 10%;">Cant. Sesiones</th>
+                    <th style="width: 15%;">Acciones Evaluación</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assessment in assessments %}
+                    <tr>
+                        <td>{{ assessment.name }}</td>
+                        <td>
+                            <button class="common-button" href="#">Crear</button>
+                            <button class="common-button" href="#">Eliminar</button>
+                        </td>
+                        <td>
+                            <form action="#" method="post">
+                                {% csrf_token %}
+                                <button class="common-button" type="submit">Crear</button>
+                            </form>
+                        </td>
+                        <td>{{ assessment.sessions_count }}</td>
+                        <td>
+                            <button class="common-button" href="#">Editar</button>
+                            <button class="common-button" onclick="deleteAssessment({{ assessment.id }})">Eliminar</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+
+    <script>
+        setTimeout(function() {
+            let messages = document.querySelector('.messages');
+            if (messages) {
+                messages.style = "display: none";
+            }
+        }, 5000);
+
+        document.getElementById('addAssessmentForm').addEventListener('submit', function(event) {
+            var addAssessmentFormNameInput = document.getElementById('addAssessmentFormNameInput');
+            var addAssessmentFormNameError = document.getElementById('addAssessmentFormNameError');
+            
+            if (addAssessmentFormNameInput.value.length > 80) {
+                event.preventDefault();
+                addAssessmentFormNameError.innerHTML = 'El nombre no puede exceder los 100 caracteres';
+                addAssessmentFormNameError.style.display = 'block';
+            } else if (addAssessmentFormNameInput.value.length == 0) {
+                event.preventDefault();
+                addAssessmentFormNameError.innerHTML = 'El nombre no puede estar vacío';
+                addAssessmentFormNameError.style.display = 'block';
+            } else {
+                addAssessmentFormNameError.style.display = 'none';
+            }
+        });
+
+        function deleteAssessment(assessmentId) {
+            if (confirm('¿Está seguro de eliminar esta evaluación?')) {
+                fetch(`{% url 'remove_assessment' assessment_id=0 %}`.replace('0', assessmentId), {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                }).then(response => {
+                    if (response.ok) {
+                        //alert('Evaluación eliminada exitosamente');
+                        location.reload();
+                    } else {
+                        alert('No se pudo eliminar la evaluación');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('Ocurrió un error');
+                });
+            }
+        }
+    </script>
+{% endblock %}

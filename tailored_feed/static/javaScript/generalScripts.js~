@@ -1,0 +1,24 @@
+// Change string case to Title case. <String>.toTitleCase()
+String.prototype.toTitleCase = function () {
+    return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+};
+
+// The text element must use the warning class
+function showMessage (element, message, status) {
+    const { timer } = rxjs;
+    const aTimer = timer(3000);
+
+    if(status == "success"){
+        element.style = "background: #006600";
+    } if (status == "failure") {
+        element.style = "background: #CC0000";
+    }
+
+    element.innerHTML = message;
+    element.style.display = "block";
+
+    aTimer.subscribe(() => {
+        element.innerHTML = "";
+        element.style.display = "none";
+    });
+}

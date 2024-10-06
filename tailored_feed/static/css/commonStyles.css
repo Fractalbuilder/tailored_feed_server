@@ -1,0 +1,283 @@
+/* ----------------------------------------
+  General
+*/
+
+a {
+    color: #800000ff;
+    font-weight: bold;
+}
+
+a:hover {
+    color: rgb(189, 1, 1);
+    text-decoration: none;
+}
+
+body {
+  padding: 0px 0px;
+  background: linear-gradient(180deg, #800000ff 0%, rgb(189, 1, 1) 7%, rgb(189, 1, 1) 93%, #800000ff 100%); 
+}
+
+h1 {
+  color: #44aa00;
+  font-weight: bold;
+  margin: 0 0 10px 0;
+}
+
+h2 {
+    color: #44aa00;
+    font-weight: bold;
+    margin: 0 0 7px 0;
+}
+
+h3 {
+    color: #44aa00;
+    margin: 0 0 7px 0;
+}
+
+hr {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background-color: #44aa00;
+}
+
+input {
+  flex-grow: 1;
+  border: 0px;
+  border-radius: 4px;
+  padding: 4px 4px;
+  color: black;
+}
+
+.centered-content {
+  display: flex;
+  justify-content: center;
+}
+
+.common-text {
+    color: white;
+    font-size: 16px;
+}
+
+.common-button {
+  color: white;
+  background: #44aa00;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin: 0 0;
+}
+
+.common-button:hover {
+  background: #05571f;;
+}
+
+#asd {
+  color: white;
+  background: #CC0000;
+  background: #006600;
+  border-radius: 4px;
+  padding: 4px 4px;
+}
+
+.field {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    background: #44aa00;
+    color: #800000ff;
+    border-radius: 6px;
+    padding: 6px 6px;
+    margin: 0px 0px;
+}
+
+.grid-element {
+  margin: 5px 0px;
+}
+
+.path-text {
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.input-field {
+  background: #44aa00;
+  color: #800000ff;
+  border-radius: 6px;
+  padding: 6px 6px;
+  margin: 5px 0px;
+  display: flex;
+}
+
+#main-container {
+  padding: 12px 10px;
+}
+
+.background-color1 {
+    background-color: #44aa00;
+}
+ 
+p {
+  margin: 0 0;
+}
+
+.message {
+  display: none;
+  font-weight: bold;
+}
+.success {
+  color: green;
+}
+
+.rounded-container {
+  border-radius: 10px;
+  background: white;
+}
+
+.unspaced-form-row {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  margin-right: 0px;
+  margin-left: 0px;
+}
+
+.unspaced-form-row > .col,
+.unspaced-form-row > [class*="col-"] {
+  padding: 10px 10px;
+}
+
+.vertically-centered {
+  display: flex;
+  align-items: center;
+}
+
+
+/* ----------------------------------------
+  Spaces
+*/
+
+.botton-space-s {
+  margin-bottom: 5px;
+}
+
+.botton-space-m {
+  margin-bottom: 10px;
+}
+
+/* ----------------------------------------
+  Menu
+*/
+
+/* The "a" selector doesn't apply to sub menu-options, thus that info is re-included here. */
+.menu-option {
+    color: rgb(189, 1, 1);
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.menu-option:hover {
+  color: #800000ff;
+  text-decoration: none;
+}
+
+.custom-toggler .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='%23078930' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E");
+}
+
+.custom-toggler.navbar-toggler {
+  border-color: #800000ff;
+}
+
+.navbar{
+  padding: 10px 10px;
+}
+
+.navbar-brand{
+  padding: 0 0;
+}
+
+
+/* ----------------------------------------
+  Add
+*/
+.feature-field {
+  background: #44aa00;
+  color: #800000ff;
+  border-radius: 6px;
+  padding: 6px 6px;
+  margin: 5px 0px;
+}
+
+.feature-input {
+  flex-grow: 1;
+  border: 0px;
+  border-radius: 4px;
+  padding: 4px 4px;
+}
+
+/* ----------------------------------------
+  General Delete me
+*/
+
+ul {
+  padding-left: 14px;
+  margin: 0 0;
+}
+
+html {
+  min-height: 100%;
+}
+
+#main-hr {
+  margin: 0 0;
+}
+
+
+.bordered-section {
+  border-style: solid;
+  border-width: thin;
+  border-color:#cccccc;
+  background: white;
+}
+
+.form-row-header {
+  padding: 10px 10px;
+}
+
+.form-row-row {
+  border: 1px solid black;
+  padding: 10px 10px;
+}
+
+.form-row-separator {
+  margin-top: 30px;
+  margin-bottom: 12px;
+}
+
+.spaced {
+  margin: 0 5px 5px 0;
+}
+
+.title {
+  color: #002255;
+  font-weight: bold;
+  margin-bottom: 0px
+}
+
+.vertically-spaced {
+  margin-top: 5px;
+}
+
+.wrapped-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  position: relative;
+}
+
+.warning {
+  display: none;
+  font-weight: bold;
+}

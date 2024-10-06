@@ -1,0 +1,35 @@
+.messages-container {
+  width: 100%;
+}
+
+.messages {
+  width: 100%;
+}
+
+.alert {
+  padding: 10px;
+  margin: 0;
+  text-align: center;
+  border-radius: 0px;
+  font-weight: bold;
+}
+
+.alert.success {
+  background-color: green;
+  color: white;
+}
+
+.alert.error {
+  background-color: red;
+  color: white;
+}
+
+.alert.info {
+  background-color: blue;
+  color: white;
+}
+
+.alert.warning {
+  background-color: orange;
+  color: white;
+}
