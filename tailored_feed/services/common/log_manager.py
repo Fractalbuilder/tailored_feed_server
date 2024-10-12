@@ -4,7 +4,7 @@ from .exception_manager import ExceptionManager
 
 class LogManager:
     def __init__(self, logger=None):
-        self.logger = logger or logging.getLogger()
+        self.logger = logger or logging.getLogger('django')
         self.exception_manager = ExceptionManager()
 
     def log_report(self, method_name: str, parameters: dict=None, trace=""):

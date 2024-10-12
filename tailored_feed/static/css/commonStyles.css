@@ -60,6 +60,7 @@ input {
 
 .common-button {
   color: white;
+  font-weight: bold;
   background: #44aa00;
   border: none;
   border-radius: 4px;
@@ -173,7 +174,7 @@ p {
 /* The "a" selector doesn't apply to sub menu-options, thus that info is re-included here. */
 .menu-option {
     color: rgb(189, 1, 1);
-    font-size: 16px;
+    font-size: 20px;
     font-weight: bold;
 }
 

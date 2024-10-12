@@ -1,0 +1,32 @@
+<div id="confirmationModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <p id="confirmationMessage"></p>
+        <button id="confirmBtn" class="common-button" style="margin-top: 10px;">Confirmar</button>
+        <button id="cancelBtn" class="common-button" style="margin-top: 10px;">Cancelar</button>
+    </div>
+</div>
+
+<script>
+    let confirmCallback = null;
+
+    function showConfirmationModal(message, callback) {
+        document.getElementById('confirmationMessage').textContent = message;
+        confirmCallback = callback;
+        document.getElementById('confirmationModal').style.display = 'flex';
+    }
+
+    document.getElementById('confirmBtn').addEventListener('click', function() {
+        if (confirmCallback) {
+            confirmCallback();
+        }
+        hideConfirmationModal();
+    });
+
+    document.getElementById('cancelBtn').addEventListener('click', function() {
+        hideConfirmationModal();
+    });
+
+    function hideConfirmationModal() {
+        document.getElementById('confirmationModal').style.display = 'none';
+    }
+</script>

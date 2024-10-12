@@ -2,22 +2,15 @@
 {% load static %}
 
 {% block body %}
-    {% if messages %}
-    <div class="messages-container">
-        <div class="messages">
-            {% for message in messages %}
-                <div class="alert {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
+    {% include 'components/common/confirmation_modal.html' %}
+    {% include 'components/common/messages.html' %}
+    
     <div id="main-container">
         <h1>Evaluaciones</h1>
 
-        <form id="addAssessmentForm" action="{% url 'add_assessment' %}" method="post">
+        <form id="addAssessmentForm" action="{% url 'add_assessment' %}" method="POST">
             {% csrf_token %}
-            <input id="addAssessmentFormNameInput" type="text" name="name" placeholder="Nombre" autofocus>
+            <input id="addAssessmentFormNameInput" style="margin-right: 4px;" type="text" name="name" placeholder="Nombre" autofocus>
             <button class="common-button" type="submit">Crear</button>
             <span id="addAssessmentFormNameError" class="common-text" style="display:none;"></span>
         </form>
@@ -54,7 +47,10 @@
                         <td>{{ assessment.sessions_count }}</td>
                         <td>
                             <button class="common-button" href="#">Editar</button>
-                            <button class="common-button" onclick="deleteAssessment({{ assessment.id }})">Eliminar</button>
+                            <button class="common-button" onclick="handleDeleteAssessment({{ assessment.id }})">Eliminar</button>
+                            <form id="deleteForm_{{ assessment.id }}" action="{% url 'remove_assessment' assessment.id %}" method="POST" style="display: none;">
+                                {% csrf_token %}    
+                            </form>
                         </td>
                     </tr>
                 {% endfor %}
@@ -64,12 +60,15 @@
     </div>
 
     <script>
-        setTimeout(function() {
-            let messages = document.querySelector('.messages');
-            if (messages) {
-                messages.style = "display: none";
-            }
-        }, 5000);
+        function handleDeleteAssessment(assessmentId) {
+            showConfirmationModal('¿Está seguro de eliminar esta evaluación?', function() {
+                const form = document.getElementById('deleteForm_' + assessmentId);
+
+                if (form) {
+                    form.submit();
+                }
+            });
+        }
 
         document.getElementById('addAssessmentForm').addEventListener('submit', function(event) {
             var addAssessmentFormNameInput = document.getElementById('addAssessmentFormNameInput');
@@ -87,26 +86,5 @@
                 addAssessmentFormNameError.style.display = 'none';
             }
         });
-
-        function deleteAssessment(assessmentId) {
-            if (confirm('¿Está seguro de eliminar esta evaluación?')) {
-                fetch(`{% url 'remove_assessment' assessment_id=0 %}`.replace('0', assessmentId), {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                    },
-                }).then(response => {
-                    if (response.ok) {
-                        //alert('Evaluación eliminada exitosamente');
-                        location.reload();
-                    } else {
-                        alert('No se pudo eliminar la evaluación');
-                    }
-                }).catch(error => {
-                    console.error('Error:', error);
-                    alert('Ocurrió un error');
-                });
-            }
-        }
     </script>
 {% endblock %}
