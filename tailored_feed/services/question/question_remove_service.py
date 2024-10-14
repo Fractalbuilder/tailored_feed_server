@@ -1,8 +1,8 @@
 import inspect
 from tailored_feed.services.common.exception_manager import ExceptionManager
-from tailored_feed.services.assessment.assessment_remove_service_interface import AssessmentRemoveServiceInterface
+from tailored_feed.services.question.question_remove_service_interface import QuestionRemoveServiceInterface
 
-class AssessmentRemoveService(AssessmentRemoveServiceInterface):
+class QuestionRemoveService(QuestionRemoveServiceInterface):
     def __init__(self, remove_repository):
         self.exception_manager = ExceptionManager()
         self.remove_repository = remove_repository

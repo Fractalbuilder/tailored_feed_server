@@ -1,0 +1,133 @@
+{% extends "common/layout.html" %}
+{% load static %}
+
+{% block body %}
+    {% include 'components/common/confirmation_modal.html' %}
+    {% include 'components/common/messages.html' %}
+    
+    <div id="main-container">
+        <h1>Crear Pregunta</h1>
+
+        <label class="common-text" for="option-statement">Enunciado pregunta:</label><br>
+        <textarea id="statement" rows="4" cols="50">{{ question.statement }}</textarea><br><br>
+        <hr>
+
+        <h2>Nueva Opción</h2>
+        <label class="common-text" for="option-statement">Enunciado opción:</label><br>
+        <textarea id="option-statement" rows="2" cols="50"></textarea><br><br>
+
+        <label class="common-text">¿Respuesta acertada?</label>
+        <button class="common-button" type="button" id="correct-answer-toggle">No</button><br><br>
+        <button class="common-button" type="button" id="add-option">Agregar</button><br><br>
+        <hr>
+
+        <h2>Opciones Agregadas</h2>
+        <br>
+        <table id="options-table" border="1">
+            <thead>
+                <tr>
+                    <th style="width: 75%;">Enunciado</th>
+                    <th style="width: 25%;">¿Respuesta acertada?</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- The body will be populated by JavaScript -->
+            </tbody>
+        </table><br>
+
+        <hr>
+        <p class="common-text">No se guardará ningún cambio hasta que presione en "Guardar todo"</p>
+        <br>
+        <button class="common-button" type="button" id="save-question">Guardar todo</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Prepopulate options array with existing question options
+            let options = [
+                {% for option in question.options %}
+                    {
+                        statement: "{{ option.statement }}",
+                        correct: {{ option.correct|yesno:"true,false" }}
+                    },
+                {% endfor %}
+            ];
+
+            // If there are existing options, render them in the table
+            let table = document.getElementById('options-table').getElementsByTagName('tbody')[0];
+            options.forEach(option => {
+                let newRow = table.insertRow();
+                newRow.insertCell(0).textContent = option.statement;
+                newRow.insertCell(1).textContent = option.correct ? 'Sí' : 'No';
+            });
+
+            let correctAnswerButton = document.getElementById('correct-answer-toggle');
+            let correctAnswer = false; // Default value for correct answer toggle
+
+            // Toggle between 'Sí' and 'No' for correct answer
+            correctAnswerButton.addEventListener('click', function () {
+                correctAnswer = !correctAnswer;
+                correctAnswerButton.textContent = correctAnswer ? 'Sí' : 'No';
+            });
+
+            // Add new option to the options array and table
+            document.getElementById('add-option').addEventListener('click', function () {
+                let optionStatement = document.getElementById('option-statement').value;
+
+                if (optionStatement.trim()) {
+                    options.push({
+                        statement: optionStatement,
+                        correct: correctAnswer
+                    });
+
+                    // Add new row to the table
+                    let newRow = table.insertRow();
+                    newRow.insertCell(0).textContent = optionStatement;
+                    newRow.insertCell(1).textContent = correctAnswer ? 'Sí' : 'No';
+
+                    // Clear input fields and reset toggle
+                    document.getElementById('option-statement').value = '';
+                    correctAnswerButton.textContent = 'No';
+                    correctAnswer = false;
+                }
+            });
+
+            // Handle form submission with fetch
+            document.getElementById('save-question').addEventListener('click', function () {
+                let statement = document.getElementById('statement').value;
+
+                if (statement.trim() && options.length > 0) {
+                    let assessment_id = {{ assessment_id }};
+
+                    let data = {
+                        assessment_id: assessment_id,
+                        statement: statement,
+                        options: options
+                    };
+
+                    // Send data using fetch
+                    fetch("{% url 'question_add' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        window.location.href = "{% url 'questions_view' assessment_id=assessment_id %}";
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        //alert('Ocurrió un error al guardar la pregunta.');
+                        let redirectUrl = `/question/add_view/${result.id}/${assessment_id}`;
+                        window.location.href = redirectUrl;
+                    });
+                } else {
+                    alert('Debe llenar la pregunta y agregar al menos una opción.');
+                }
+            });
+        });
+    </script>
+{% endblock %}

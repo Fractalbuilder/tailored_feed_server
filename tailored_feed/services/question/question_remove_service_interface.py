@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class AssessmentRemoveServiceInterface(ABC):
+class QuestionRemoveServiceInterface(ABC):
 
     @abstractmethod
     def remove(self, id: int):

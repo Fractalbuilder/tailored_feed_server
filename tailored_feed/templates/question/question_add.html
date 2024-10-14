@@ -1,0 +1,119 @@
+{% extends "common/layout.html" %}
+{% load static %}
+
+{% block body %}
+    {% include 'components/common/confirmation_modal.html' %}
+    {% include 'components/common/messages.html' %}
+    
+    <div id="main-container">
+        <div class="title-container">
+            <h1>Crear Pregunta</h1>
+            <a class="common-button" href="{% url 'questions_view' assessment_id=context.assessment.id %}">Volver</a>
+        </div>
+
+        <label class="common-text" for="option-statement">Enunciado pregunta:</label><br>
+        <textarea id="statement" rows="4" cols="50"></textarea><br><br>
+        <hr>
+
+        <h2>Nueva Opción</h2>
+        <label class="common-text" for="option-statement">Enunciado opción:</label><br>
+        <textarea id="option-statement" rows="2" cols="50"></textarea><br><br>
+
+        <label class="common-text">¿Respuesta acertada?</label>
+        <button class="common-button" type="button" id="correct-answer-toggle">No</button><br><br>
+        <button class="common-button" type="button" id="add-option">Agregar</button><br><br>
+        <hr>
+
+        <h2>Opciones Agregadas</h2>
+
+        <p id="options-table-warning" class="common-text">No hay opciones aún</p>
+
+        <table id="options-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">No.</th>
+                    <th style="width: 70%;">Enunciado</th>
+                    <th style="width: 25%;">¿Respuesta acertada?</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <br>
+
+        <hr>
+        <p class="common-text">No se guardará ningún cambio hasta que presione en "Guardar todo"</p>
+        <br>
+        <button class="common-button" type="button" id="save-question">Guardar todo</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let options = [];
+            let table = document.getElementById('options-table').getElementsByTagName('tbody')[0];
+            let correctAnswerButton = document.getElementById('correct-answer-toggle');
+            let correctAnswer = false;
+
+            correctAnswerButton.addEventListener('click', function () {
+                correctAnswer = !correctAnswer;
+                correctAnswerButton.textContent = correctAnswer ? 'Sí' : 'No';
+            });
+
+            document.getElementById('add-option').addEventListener('click', function () {
+                let optionStatement = document.getElementById('option-statement').value;
+
+                if (optionStatement.trim()) {
+                    options.push({
+                        statement: optionStatement,
+                        correct: correctAnswer
+                    });
+
+                    let newRow = table.insertRow();
+                    newRow.insertCell(0).textContent = options.length;
+                    newRow.insertCell(1).textContent = optionStatement;
+                    newRow.insertCell(2).textContent = correctAnswer ? 'Sí' : 'No';
+                    document.getElementById('option-statement').value = '';
+                    correctAnswerButton.textContent = 'No';
+                    correctAnswer = false;
+                    document.getElementById('options-table-warning').style.display = "none";
+                    document.getElementById('options-table').style.display = "block";
+                }
+            });
+
+            document.getElementById('save-question').addEventListener('click', function () {
+                let statement = document.getElementById('statement').value;
+
+                if (statement.trim() && options.length > 0) {
+                    let assessment_id = {{ context.assessment.id }};
+
+                    let data = {
+                        assessment_id: assessment_id,
+                        statement: statement,
+                        options: options
+                    };
+
+                    fetch("{% url 'question_add' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        console.log("A");
+                        window.location.href = "{% url 'questions_view' assessment_id=context.assessment.id %}";
+                    })
+                    .catch(error => {
+                        console.log("B");
+                        console.error('Error:', error);
+                        window.location.href = "{% url 'question_add_view' assessment_id=context.assessment.id %}";
+                    });
+                } else {
+                    alert('Debe llenar la pregunta y agregar al menos una opción.');
+                }
+            });
+        });
+    </script>
+{% endblock %}

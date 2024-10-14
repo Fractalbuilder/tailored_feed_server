@@ -1,0 +1,89 @@
+{% extends "common/layout.html" %}
+{% load static %}
+
+{% block body %}
+    {% include 'components/common/confirmation_modal.html' %}
+    {% include 'components/common/messages.html' %}
+    
+    <div id="main-container">
+        <div class="title-container">
+            <h1>Preguntas</h1>
+            <a class="common-button" href="{% url 'assessments_view' %}">Volver</a>
+        </div>
+        
+        <div>
+            <a
+                {% if context.assessment.editable %}
+                    class="common-button" href="{% url 'question_add_view' assessment_id=context.assessment.id %}"
+                {% else %}
+                    class="common-button-a-disabled" href="#"
+                {% endif %}
+            >Crear pregunta</a>
+        </div>
+        <br>
+        <hr>
+        {% if not questions %}
+            <p class="common-text">No hay preguntas aún</p>
+        {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">No.</th>
+                        <th style="width: 55%;">Enunciado</th>
+                        <th style="width: 10%;">Cant. Preguntas</th>
+                        <th style="width: 15%;">Retroalimentación</th>
+                        <th style="width: 15%;">Acciones Pregunta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for question in questions %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ question.statement }}</td>
+                            <td>{{ question.options|length }}</td>
+                            <td>
+                                {% if question.feedback_text %}
+                                    <img src="{% static 'images/feedback/text_icon_active.svg' %}" alt="Texto_si" width="30px" height="30px">
+                                {% else %}
+                                    <img src="{% static 'images/feedback/text_icon_inactive.svg' %}" alt="Texto_no" width="30px" height="30px">
+                                {% endif %}
+                                {% if question.feedback_image %}
+                                    <img src="{% static 'images/feedback/image_icon_active.svg' %}" alt="Imagen_si" width="30px" height="30px">
+                                {% else %}
+                                    <img src="{% static 'images/feedback/image_icon_inactive.svg' %}" alt="Imagen_no" width="30px" height="30px">
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="common-button" onclick="handleDeleteQuestion({{ question.id }})"
+                                    {% if not context.assessment.editable %}
+                                        disabled
+                                    {% endif %}
+                                >Eliminar</button>
+                                <form id="deleteForm_{{ question.id }}" action="{% url 'question_remove' %}" method="POST" style="display: none;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="assessment_id" value="{{ context.assessment.id }}">
+                                    <input type="hidden" name="id" value="{{ question.id }}">
+                                </form>
+                                <a class="common-button" href="#">Ver</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+
+    <script>
+        function handleDeleteQuestion(questionId) {
+            showConfirmationModal('¿Está seguro de eliminar esta pregunta?', function() {
+                const form = document.getElementById('deleteForm_' + questionId);
+
+                if (form) {
+                    form.submit();
+                }
+            });
+
+            document.getElementById('confirmBtn').focus();
+        }
+    </script>
+{% endblock %}

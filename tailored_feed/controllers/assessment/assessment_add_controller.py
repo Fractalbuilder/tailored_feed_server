@@ -32,4 +32,4 @@ class AssessmentAddController:
 
             return redirect('error_page')
 
-        return redirect('assessment_dashboard')
+        return redirect('assessments_view')

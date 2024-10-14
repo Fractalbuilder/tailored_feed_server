@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
-class ErrorPageController:
+class ErrorPageViewController:
 
     @staticmethod
-    def show_view(request):
+    def view(request):
         return render(request, 'common/error_page.html')

@@ -16,7 +16,7 @@ def login_view(request):
                 login(request, user)
 
                 if user.role == 'teacher':
-                    return redirect('teacher_dashboard')
+                    return redirect('teachers_view')
                 else:
                     messages.error(request, "Unauthorized access")
             else:

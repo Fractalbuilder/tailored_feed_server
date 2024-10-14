@@ -3,13 +3,13 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from tailored_feed.exceptions.content_error import ContentError
 from tailored_feed.services.common.log_manager import LogManager
-from tailored_feed.repositories.assessment.assessment_remove_repository import AssessmentRemoveRepository
-from tailored_feed.services.assessment.assessment_remove_service import AssessmentRemoveService
+from tailored_feed.repositories.question.question_remove_repository import QuestionRemoveRepository
+from tailored_feed.services.question.question_remove_service import QuestionRemoveService
 
 log_manager = LogManager()
-assessment_remove_service = AssessmentRemoveService(AssessmentRemoveRepository())
+question_remove_service = QuestionRemoveService(QuestionRemoveRepository())
 
-class AssessmentRemoveController:
+class QuestionRemoveController:
 
     @staticmethod
     def remove(request):
@@ -18,8 +18,9 @@ class AssessmentRemoveController:
                 raise ContentError('La petición no usa el método POST')
             
             id = request.POST.get('id')
-            assessment_remove_service.remove_n_save(id=id)
-            messages.success(request, 'La evaluación se eliminó exitosamente')
+            assessment_id = request.POST.get('assessment_id')
+            question_remove_service.remove_n_save(id=id)
+            messages.success(request, 'La pregunta se eliminó exitosamente')
 
         except ContentError as e:
             messages.error(request, "Eliminación fallida. " + str(e))
@@ -32,4 +33,4 @@ class AssessmentRemoveController:
 
             return redirect('error_page')
 
-        return redirect('assessments_view')
+        return redirect('questions_view', assessment_id=assessment_id)

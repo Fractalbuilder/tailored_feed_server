@@ -1,9 +1,9 @@
 import inspect
 from tailored_feed.services.common.exception_manager import ExceptionManager
-from tailored_feed.models.assessment.assessment import Assessment
-from tailored_feed.repositories.assessment.assessment_remove_repository_interface import AssessmentRemoveRepositoryInterface
+from tailored_feed.models.assessment.assessment_question import AssessmentQuestion
+from tailored_feed.repositories.question.question_remove_repository_interface import QuestionRemoveRepositoryInterface
 
-class AssessmentRemoveRepository(AssessmentRemoveRepositoryInterface):
+class QuestionRemoveRepository(QuestionRemoveRepositoryInterface):
 
     def __init__(self):
         self.exception_manager = ExceptionManager()
@@ -11,8 +11,8 @@ class AssessmentRemoveRepository(AssessmentRemoveRepositoryInterface):
 
     def remove(self, id: int):
         try:
-            assessment = Assessment.objects.get(id=id)
-            assessment.delete()
+            question = AssessmentQuestion.objects.get(id=id)
+            question.delete()
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.remove)
