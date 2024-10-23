@@ -1,8 +1,13 @@
 import inspect
+from tailored_feed.services.common.exception_manager import ExceptionManager
 from tailored_feed.models.assessment.assessment import Assessment
 from tailored_feed.repositories.assessment.assessment_get_repository_interface import AssessmentGetRepositoryInterface
 
 class AssessmentGetRepository(AssessmentGetRepositoryInterface):
+
+    def __init__(self):
+        self.exception_manager = ExceptionManager()
+        
     
     def by_id(self, id):
         try:

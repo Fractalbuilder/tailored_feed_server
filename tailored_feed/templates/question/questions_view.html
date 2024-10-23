@@ -64,7 +64,7 @@
                                     <input type="hidden" name="assessment_id" value="{{ context.assessment.id }}">
                                     <input type="hidden" name="id" value="{{ question.id }}">
                                 </form>
-                                <a class="common-button" href="#">Ver</a>
+                                <a class="common-button" href="{% url 'question_update_view' id=question.id %}">Ver</a>
                             </td>
                         </tr>
                     {% endfor %}

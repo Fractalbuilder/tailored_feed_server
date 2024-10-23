@@ -1,9 +1,14 @@
 import inspect
+from tailored_feed.services.common.exception_manager import ExceptionManager
 from tailored_feed.models.assessment.assessment_question import AssessmentQuestion
 from tailored_feed.repositories.question.question_get_repository_interface import QuestionGetRepositoryInterface
 
 class QuestionGetRepository(QuestionGetRepositoryInterface):
     
+    def __init__(self):
+        self.exception_manager = ExceptionManager()
+
+
     def by_id(self, id: int):
         try:
             return AssessmentQuestion.objects.get(id=id)
@@ -16,8 +21,8 @@ class QuestionGetRepository(QuestionGetRepositoryInterface):
 
     def by_assessment_id(self, assessment_id: int):
         try:
-            return AssessmentQuestion.objects.filter(assessment_id=assessment_id)
-        
+            return AssessmentQuestion.objects.filter(assessment_id=assessment_id).order_by('-id')
+
         except Exception as e:
             argspec = inspect.getfullargspec(self.by_assessment_id)
             parametros = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}

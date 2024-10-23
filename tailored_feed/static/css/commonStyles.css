@@ -48,6 +48,11 @@ input {
   color: black;
 }
 
+textarea {
+  resize: none;
+  border-radius: 4px;
+}
+
 .centered-content {
   display: flex;
   justify-content: center;

@@ -10,6 +10,7 @@ from tailored_feed.controllers.assessment.assessment_remove_controller import As
 from tailored_feed.controllers.question.questions_view_controller import QuestionsViewController
 from tailored_feed.controllers.question.question_add_controller import QuestionAddController
 from tailored_feed.controllers.question.question_remove_controller import QuestionRemoveController
+from tailored_feed.controllers.question.question_update_controller import QuestionUpdateController
 
 urlpatterns = [
     path("", views.index, name="index"),
@@ -23,7 +24,9 @@ urlpatterns = [
     path('assessment/add/', AssessmentAddController.add, name='assessment_add'),
     path('assessment/remove/', AssessmentRemoveController.remove, name='assessment_remove'),
     path('question/<int:assessment_id>', QuestionsViewController.view, name='questions_view'),
-    path('question/add_view/<int:assessment_id>', QuestionAddController.question_add_view, name='question_add_view'),
+    path('question/add_view/<int:assessment_id>', QuestionAddController.view, name='question_add_view'),
     path('question/add/', QuestionAddController.add, name='question_add'),
     path('question/remove/', QuestionRemoveController.remove, name='question_remove'),
+    path('question/update_view/<int:id>', QuestionUpdateController.view, name='question_update_view'),
+    path('question/update/', QuestionUpdateController.update, name='question_update'),
 ]

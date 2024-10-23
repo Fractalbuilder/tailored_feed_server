@@ -6,34 +6,57 @@
     {% include 'components/common/messages.html' %}
     
     <div id="main-container">
-        <h1>Crear Pregunta</h1>
+        <div class="title-container">
+            <h1>Detalle de Pregunta</h1>
+            <a class="common-button" href="{% url 'questions_view' assessment_id=question.assessment.id %}">Volver</a>
+        </div>
 
         <label class="common-text" for="option-statement">Enunciado pregunta:</label><br>
-        <textarea id="statement" rows="4" cols="50">{{ question.statement }}</textarea><br><br>
+        <textarea id="statement" rows="4" cols="80">{{ question.statement }}</textarea><br><br>
+        <hr>
+
+        <h2>Retroalimentación</h2>
+        <h3>Textual</h3>
+        <textarea id="feedback-text" rows="2" cols="80">{{ question.feedback_text }}</textarea><br><br>
+
+        <h3>Visual</h3>
+        {% if question.feedback_image %}
+            <img id="feedback-image-preview" src="{{ question.feedback_image.url }}" alt="Imagen retroalimentación" style="max-width: 400px; height: auto;" />
+            <p id="feedback-image-preview-warning" class="common-text" style="display: none;"></p>
+        {% else %}
+            <img id="feedback-image-preview" alt="Imagen retroalimentación" style="display: none; max-width: 400px; height: auto;" />
+            <p id="feedback-image-preview-warning" class="common-text">No hay retroalimentación visual aun</p>
+        {% endif %}
+        <br>
+        <input type="file" id="feedback-image" accept="image/*"><br><br>
         <hr>
 
         <h2>Nueva Opción</h2>
         <label class="common-text" for="option-statement">Enunciado opción:</label><br>
-        <textarea id="option-statement" rows="2" cols="50"></textarea><br><br>
+        <textarea id="option-statement" rows="2" cols="80"></textarea><br><br>
 
         <label class="common-text">¿Respuesta acertada?</label>
         <button class="common-button" type="button" id="correct-answer-toggle">No</button><br><br>
-        <button class="common-button" type="button" id="add-option">Agregar</button><br><br>
+        <button class="common-button" type="button" id="add-option" disabled>Agregar</button><br><br> <!-- Initially disabled -->
         <hr>
 
         <h2>Opciones Agregadas</h2>
-        <br>
-        <table id="options-table" border="1">
+
+        <p id="options-table-warning" class="common-text" style="display: none;">No hay opciones aún</p>
+
+        <table id="options-table">
             <thead>
                 <tr>
-                    <th style="width: 75%;">Enunciado</th>
+                    <th style="width: 5%;">No.</th>
+                    <th style="width: 50%;">Enunciado</th>
                     <th style="width: 25%;">¿Respuesta acertada?</th>
+                    <th style="width: 20%;">Acciones opción</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- The body will be populated by JavaScript -->
             </tbody>
-        </table><br>
+        </table>
+        <br>
 
         <hr>
         <p class="common-text">No se guardará ningún cambio hasta que presione en "Guardar todo"</p>
@@ -43,7 +66,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Prepopulate options array with existing question options
             let options = [
                 {% for option in question.options %}
                     {
@@ -53,26 +75,72 @@
                 {% endfor %}
             ];
 
-            // If there are existing options, render them in the table
             let table = document.getElementById('options-table').getElementsByTagName('tbody')[0];
-            options.forEach(option => {
-                let newRow = table.insertRow();
-                newRow.insertCell(0).textContent = option.statement;
-                newRow.insertCell(1).textContent = option.correct ? 'Sí' : 'No';
-            });
+                
+            function populateTable() {
+                options.forEach((option, index) => {
+                    let newRow = table.insertRow();
+                    newRow.insertCell(0).textContent = index + 1;
+                    newRow.insertCell(1).textContent = option.statement;
+                    newRow.insertCell(2).textContent = option.correct ? 'Sí' : 'No';
+
+                    // Add 'Eliminar' button in the 'Acciones opción' column
+                    let actionCell = newRow.insertCell(3);
+                    let deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Eliminar';
+                    deleteButton.className = 'common-button';
+                    deleteButton.onclick = function () {
+                        removeOption(index);
+                    };
+                    actionCell.appendChild(deleteButton);
+                });
+            }
+
+            populateTable();
 
             let correctAnswerButton = document.getElementById('correct-answer-toggle');
-            let correctAnswer = false; // Default value for correct answer toggle
+            let correctAnswer = false;
+            let addOptionButton = document.getElementById('add-option');
+            let optionStatementTextarea = document.getElementById('option-statement');
 
-            // Toggle between 'Sí' and 'No' for correct answer
+            // Toggle correct answer button
             correctAnswerButton.addEventListener('click', function () {
                 correctAnswer = !correctAnswer;
                 correctAnswerButton.textContent = correctAnswer ? 'Sí' : 'No';
             });
 
-            // Add new option to the options array and table
-            document.getElementById('add-option').addEventListener('click', function () {
-                let optionStatement = document.getElementById('option-statement').value;
+            // Enable or disable the "Agregar" button based on textarea content
+            optionStatementTextarea.addEventListener('input', function () {
+                if (optionStatementTextarea.value.trim()) {
+                    addOptionButton.disabled = false;
+                } else {
+                    addOptionButton.disabled = true;
+                }
+            });
+
+            // Function to remove an option
+            function removeOption(index) {
+                options.splice(index, 1);
+                renderOptions();
+            }
+
+            // Function to render the options table
+            function renderOptions() {
+                table.innerHTML = ''; // Clear the table first
+                populateTable();
+
+                if (options.length > 0) {
+                    document.getElementById('options-table-warning').style.display = "none";
+                    document.getElementById('options-table').style.display = "inline-table";
+                } else {
+                    document.getElementById('options-table-warning').style.display = "block";
+                    document.getElementById('options-table').style.display = "none";
+                }
+            }
+
+            // Add new option
+            addOptionButton.addEventListener('click', function () {
+                let optionStatement = optionStatementTextarea.value;
 
                 if (optionStatement.trim()) {
                     options.push({
@@ -80,52 +148,70 @@
                         correct: correctAnswer
                     });
 
-                    // Add new row to the table
-                    let newRow = table.insertRow();
-                    newRow.insertCell(0).textContent = optionStatement;
-                    newRow.insertCell(1).textContent = correctAnswer ? 'Sí' : 'No';
-
-                    // Clear input fields and reset toggle
-                    document.getElementById('option-statement').value = '';
+                    // Clear inputs after adding
+                    optionStatementTextarea.value = '';
                     correctAnswerButton.textContent = 'No';
                     correctAnswer = false;
+
+                    // Disable the "Agregar" button after clearing the textarea
+                    addOptionButton.disabled = true;
+
+                    // Render options in the table
+                    renderOptions();
                 }
             });
 
-            // Handle form submission with fetch
             document.getElementById('save-question').addEventListener('click', function () {
                 let statement = document.getElementById('statement').value;
+                let feedbackText = document.getElementById('feedback-text').value;
+                let feedbackImage = document.getElementById('feedback-image');
+                let imageFile = feedbackImage.files[0];
 
                 if (statement.trim() && options.length > 0) {
-                    let assessment_id = {{ assessment_id }};
+                    let id = {{ question.id }};
+                    let formData = new FormData();
+                    
+                    formData.append('id', id);
+                    formData.append('statement', statement);
+                    formData.append('feedback_text', feedbackText);
+                    formData.append('options', JSON.stringify(options));
 
-                    let data = {
-                        assessment_id: assessment_id,
-                        statement: statement,
-                        options: options
-                    };
+                    if (imageFile) {
+                        formData.append('feedback_image', imageFile);
+                    }
 
-                    // Send data using fetch
-                    fetch("{% url 'question_add' %}", {
+                    fetch("{% url 'question_update' %}", {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
                             'X-CSRFToken': '{{ csrf_token }}'
                         },
-                        body: JSON.stringify(data)
+                        body: formData
                     })
                     .then(response => response.json())
                     .then(result => {
-                        window.location.href = "{% url 'questions_view' assessment_id=assessment_id %}";
+                        window.location.href = "{% url 'questions_view' assessment_id=question.assessment.id %}";
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        //alert('Ocurrió un error al guardar la pregunta.');
-                        let redirectUrl = `/question/add_view/${result.id}/${assessment_id}`;
-                        window.location.href = redirectUrl;
+                        window.location.href = "{% url 'question_update_view' id=question.id %}";
                     });
                 } else {
                     alert('Debe llenar la pregunta y agregar al menos una opción.');
+                }
+            });
+
+            document.getElementById('feedback-image').addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                const imgPreview = document.getElementById('feedback-image-preview');
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        imgPreview.src = e.target.result;
+                        document.getElementById('feedback-image-preview-warning').style.display = "none";
+                        document.getElementById('feedback-image-preview').style = "display: inline; max-width: 400px; height: auto;";
+                    }
+                    reader.readAsDataURL(file);
                 }
             });
         });
