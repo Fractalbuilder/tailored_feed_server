@@ -20,10 +20,14 @@
         <textarea id="feedback-text" rows="2" cols="80"></textarea><br><br>
 
         <h3>Visual</h3>
-        <img id="feedback-image-preview" alt="Imagen retroalimentación" style="display: none;" />
+        <img id="feedback-image-preview" alt="Imagen retroalimentación" style="display: none; max-width: 400px; height: auto; padding-bottom: 10px;" />
         <p id="feedback-image-preview-warning" class="common-text">No hay retroalimentación visual aun</p>
         <br>
-        <input type="file" id="feedback-image" accept="image/*"><br><br>
+        <button id="remove-feedback-image" type="button" class="common-button" style="display: none;">Eliminar Imagen</button>
+        <input id="feedback-image" type="file" accept="image/*" style="display: none;">
+        <button id="load-feedback-image" class="common-button" type="button">Cargar Imagen</button>
+        <br>
+        <br>
         <hr>
 
         <h2>Nueva Opción</h2>
@@ -32,7 +36,7 @@
 
         <label class="common-text">¿Respuesta acertada?</label>
         <button class="common-button" type="button" id="correct-answer-toggle">No</button><br><br>
-        <button class="common-button" type="button" id="add-option" disabled>Agregar</button><br><br> <!-- Initially disabled -->
+        <button class="common-button" type="button" id="add-option" disabled>Agregar</button><br><br>
         <hr>
 
         <h2>Opciones Agregadas</h2>
@@ -67,31 +71,32 @@
             let correctAnswer = false;
             let addOptionButton = document.getElementById('add-option');
             let optionStatementTextarea = document.getElementById('option-statement');
+            let feedbackImageInput = document.getElementById('feedback-image');
+            let feedbackImagePreview = document.getElementById('feedback-image-preview');
+            let feedbackImageWarning = document.getElementById('feedback-image-preview-warning');
+            let loadImageFeedbackButton = document.getElementById('load-feedback-image');
+            let removeImageFeedbackButton = document.getElementById('remove-feedback-image');
 
-            // Toggle correct answer button
+            loadImageFeedbackButton.addEventListener('click', function () {
+                feedbackImageInput.click();
+            });
+
             correctAnswerButton.addEventListener('click', function () {
                 correctAnswer = !correctAnswer;
                 correctAnswerButton.textContent = correctAnswer ? 'Sí' : 'No';
             });
 
-            // Enable or disable the "Agregar" button based on textarea content
             optionStatementTextarea.addEventListener('input', function () {
-                if (optionStatementTextarea.value.trim()) {
-                    addOptionButton.disabled = false;
-                } else {
-                    addOptionButton.disabled = true;
-                }
+                addOptionButton.disabled = !optionStatementTextarea.value.trim();
             });
 
-            // Function to remove an option
             function removeOption(index) {
                 options.splice(index, 1);
                 renderOptions();
             }
 
-            // Function to render the options table
             function renderOptions() {
-                table.innerHTML = ''; // Clear the table first
+                table.innerHTML = '';
 
                 options.forEach((option, index) => {
                     let newRow = table.insertRow();
@@ -99,7 +104,6 @@
                     newRow.insertCell(1).textContent = option.statement;
                     newRow.insertCell(2).textContent = option.correct ? 'Sí' : 'No';
 
-                    // Add 'Eliminar' button in the 'Acciones opción' column
                     let actionCell = newRow.insertCell(3);
                     let deleteButton = document.createElement('button');
                     deleteButton.textContent = 'Eliminar';
@@ -110,16 +114,10 @@
                     actionCell.appendChild(deleteButton);
                 });
 
-                if (options.length > 0) {
-                    document.getElementById('options-table-warning').style.display = "none";
-                    document.getElementById('options-table').style.display = "inline-table";
-                } else {
-                    document.getElementById('options-table-warning').style.display = "block";
-                    document.getElementById('options-table').style.display = "none";
-                }
+                document.getElementById('options-table-warning').style.display = options.length > 0 ? "none" : "block";
+                document.getElementById('options-table').style.display = options.length > 0 ? "inline-table" : "none";
             }
 
-            // Add new option
             addOptionButton.addEventListener('click', function () {
                 let optionStatement = optionStatementTextarea.value;
 
@@ -129,24 +127,40 @@
                         correct: correctAnswer
                     });
 
-                    // Clear inputs after adding
                     optionStatementTextarea.value = '';
                     correctAnswerButton.textContent = 'No';
                     correctAnswer = false;
-
-                    // Disable the "Agregar" button after clearing the textarea
                     addOptionButton.disabled = true;
-
-                    // Render options in the table
                     renderOptions();
                 }
+            });
+
+            feedbackImageInput.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        feedbackImagePreview.src = e.target.result;
+                        feedbackImageWarning.style.display = "none";
+                        feedbackImagePreview.style.display = "inline";
+                        removeImageFeedbackButton.style.display = "inline";
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            removeImageFeedbackButton.addEventListener('click', function () {
+                feedbackImageInput.value = '';
+                feedbackImagePreview.style.display = "none";
+                feedbackImageWarning.style.display = "block";
+                removeImageFeedbackButton.style.display = "none";
             });
 
             document.getElementById('save-question').addEventListener('click', function () {
                 let statement = document.getElementById('statement').value;
                 let feedbackText = document.getElementById('feedback-text').value;
-                let feedbackImage = document.getElementById('feedback-image');
-                let imageFile = feedbackImage.files[0];
+                let imageFile = feedbackImageInput.files[0];
 
                 if (statement.trim() && options.length > 0) {
                     let assessment_id = {{ context.assessment.id }};
@@ -178,21 +192,6 @@
                     });
                 } else {
                     alert('Debe llenar la pregunta y agregar al menos una opción.');
-                }
-            });
-
-            document.getElementById('feedback-image').addEventListener('change', function (event) {
-                const file = event.target.files[0];
-                const imgPreview = document.getElementById('feedback-image-preview');
-
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        imgPreview.src = e.target.result;
-                        document.getElementById('feedback-image-preview-warning').style.display = "none";
-                        document.getElementById('feedback-image-preview').style = "display: inline; max-width: 400px; height: auto;";
-                    }
-                    reader.readAsDataURL(file);
                 }
             });
         });

@@ -51,16 +51,12 @@ class QuestionUpdateController:
             question.statement = statement
             question.options = options
             question.feedback_text = feedback_text
+            question.feedback_image = None
 
             if 'feedback_image' in request.FILES:
                 feedback_image = request.FILES['feedback_image']
-                ext = feedback_image.name.split('.')[-1]  # Get the file extension
-
-                # Build the dynamic path using assessment_id and question_id
+                ext = feedback_image.name.split('.')[-1]
                 image_path = f'{question.assessment.id}/{id}.{ext}'
-
-                # Set the file path on the question object (but don't save yet)
-                #question.feedback_image.name = image_path
                 question.feedback_image.save(image_path, feedback_image)
 
             question_add_service.add_n_save(question)

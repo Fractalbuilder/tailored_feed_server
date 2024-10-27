@@ -21,14 +21,20 @@
 
         <h3>Visual</h3>
         {% if question.feedback_image %}
-            <img id="feedback-image-preview" src="{{ question.feedback_image.url }}" alt="Imagen retroalimentación" style="max-width: 400px; height: auto;" />
-            <p id="feedback-image-preview-warning" class="common-text" style="display: none;"></p>
+            <img id="feedback-image-preview" src="{{ question.feedback_image.url }}" alt="Imagen retroalimentación" style="max-width: 400px; height: auto; padding-bottom: 10px;" />
+            <p id="feedback-image-preview-warning" class="common-text" style="display: none;">No hay retroalimentación visual aun</p>
+            <br>
+            <button id="remove-feedback-image" type="button" class="common-button">Eliminar Imagen</button>
         {% else %}
-            <img id="feedback-image-preview" alt="Imagen retroalimentación" style="display: none; max-width: 400px; height: auto;" />
+            <img id="feedback-image-preview" alt="Imagen retroalimentación" style="display: none; max-width: 400px; height: auto; padding-bottom: 10px;" />
             <p id="feedback-image-preview-warning" class="common-text">No hay retroalimentación visual aun</p>
+            <br>
+            <button id="remove-feedback-image" type="button" class="common-button" style="display: none;">Eliminar Imagen</button>
         {% endif %}
+        <input id="feedback-image" type="file" accept="image/*" style="display: none;">
+        <button id="load-feedback-image" class="common-button" type="button">Cargar Imagen</button>
         <br>
-        <input type="file" id="feedback-image" accept="image/*"><br><br>
+        <br>
         <hr>
 
         <h2>Nueva Opción</h2>
@@ -66,6 +72,43 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            let table = document.getElementById('options-table').getElementsByTagName('tbody')[0];
+            let loadImageFeedbackButton = document.getElementById('load-feedback-image');
+            let removeImageFeedbackButton = document.getElementById('remove-feedback-image');
+            let feedbackImageInput = document.getElementById('feedback-image');
+            let feedbackImagePreview = document.getElementById('feedback-image-preview');
+            let feedbackImageWarning = document.getElementById('feedback-image-preview-warning');
+            
+            if (feedbackImagePreview.src) {
+                removeImageFeedbackButton.style.display = 'inline';
+            }
+    
+            loadImageFeedbackButton.addEventListener('click', function () {
+                feedbackImageInput.click();
+            });
+    
+            feedbackImageInput.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        feedbackImagePreview.src = e.target.result;
+                        feedbackImageWarning.style.display = "none";
+                        feedbackImagePreview.style.display = "inline";
+                        removeImageFeedbackButton.style.display = "inline";
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+    
+            removeImageFeedbackButton.addEventListener('click', function () {
+                feedbackImageInput.value = '';
+                feedbackImagePreview.style.display = 'none';
+                feedbackImageWarning.style.display = 'block';
+                removeImageFeedbackButton.style.display = 'none';
+            });
+    
             let options = [
                 {% for option in question.options %}
                     {
@@ -74,17 +117,15 @@
                     },
                 {% endfor %}
             ];
-
-            let table = document.getElementById('options-table').getElementsByTagName('tbody')[0];
-                
+    
             function populateTable() {
+                table.innerHTML = '';
                 options.forEach((option, index) => {
                     let newRow = table.insertRow();
                     newRow.insertCell(0).textContent = index + 1;
                     newRow.insertCell(1).textContent = option.statement;
                     newRow.insertCell(2).textContent = option.correct ? 'Sí' : 'No';
-
-                    // Add 'Eliminar' button in the 'Acciones opción' column
+    
                     let actionCell = newRow.insertCell(3);
                     let deleteButton = document.createElement('button');
                     deleteButton.textContent = 'Eliminar';
@@ -94,41 +135,7 @@
                     };
                     actionCell.appendChild(deleteButton);
                 });
-            }
-
-            populateTable();
-
-            let correctAnswerButton = document.getElementById('correct-answer-toggle');
-            let correctAnswer = false;
-            let addOptionButton = document.getElementById('add-option');
-            let optionStatementTextarea = document.getElementById('option-statement');
-
-            // Toggle correct answer button
-            correctAnswerButton.addEventListener('click', function () {
-                correctAnswer = !correctAnswer;
-                correctAnswerButton.textContent = correctAnswer ? 'Sí' : 'No';
-            });
-
-            // Enable or disable the "Agregar" button based on textarea content
-            optionStatementTextarea.addEventListener('input', function () {
-                if (optionStatementTextarea.value.trim()) {
-                    addOptionButton.disabled = false;
-                } else {
-                    addOptionButton.disabled = true;
-                }
-            });
-
-            // Function to remove an option
-            function removeOption(index) {
-                options.splice(index, 1);
-                renderOptions();
-            }
-
-            // Function to render the options table
-            function renderOptions() {
-                table.innerHTML = ''; // Clear the table first
-                populateTable();
-
+    
                 if (options.length > 0) {
                     document.getElementById('options-table-warning').style.display = "none";
                     document.getElementById('options-table').style.display = "inline-table";
@@ -137,30 +144,49 @@
                     document.getElementById('options-table').style.display = "none";
                 }
             }
-
-            // Add new option
+    
+            populateTable();
+    
+            let correctAnswerButton = document.getElementById('correct-answer-toggle');
+            let correctAnswer = false;
+            let addOptionButton = document.getElementById('add-option');
+            let optionStatementTextarea = document.getElementById('option-statement');
+    
+            correctAnswerButton.addEventListener('click', function () {
+                correctAnswer = !correctAnswer;
+                correctAnswerButton.textContent = correctAnswer ? 'Sí' : 'No';
+            });
+    
+            optionStatementTextarea.addEventListener('input', function () {
+                addOptionButton.disabled = !optionStatementTextarea.value.trim();
+            });
+    
+            function removeOption(index) {
+                options.splice(index, 1);
+                renderOptions();
+            }
+    
+            function renderOptions() {
+                populateTable();
+            }
+    
             addOptionButton.addEventListener('click', function () {
                 let optionStatement = optionStatementTextarea.value;
-
+    
                 if (optionStatement.trim()) {
                     options.push({
                         statement: optionStatement,
                         correct: correctAnswer
                     });
-
-                    // Clear inputs after adding
+    
                     optionStatementTextarea.value = '';
                     correctAnswerButton.textContent = 'No';
                     correctAnswer = false;
-
-                    // Disable the "Agregar" button after clearing the textarea
                     addOptionButton.disabled = true;
-
-                    // Render options in the table
                     renderOptions();
                 }
             });
-
+    
             document.getElementById('save-question').addEventListener('click', function () {
                 let statement = document.getElementById('statement').value;
                 let feedbackText = document.getElementById('feedback-text').value;
@@ -199,21 +225,6 @@
                     alert('Debe llenar la pregunta y agregar al menos una opción.');
                 }
             });
-
-            document.getElementById('feedback-image').addEventListener('change', function (event) {
-                const file = event.target.files[0];
-                const imgPreview = document.getElementById('feedback-image-preview');
-
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        imgPreview.src = e.target.result;
-                        document.getElementById('feedback-image-preview-warning').style.display = "none";
-                        document.getElementById('feedback-image-preview').style = "display: inline; max-width: 400px; height: auto;";
-                    }
-                    reader.readAsDataURL(file);
-                }
-            });
         });
-    </script>
+    </script>    
 {% endblock %}
