@@ -1,0 +1,119 @@
+{% extends "common/layout.html" %}
+{% load static %}
+
+{% block body %}
+    {% include 'components/common/confirmation_modal.html' %}
+    {% include 'components/common/messages.html' %}
+    
+    <div id="main-container">
+        <div class="title-container">
+            <h1>Sesión Dashboard</h1>
+            <a class="common-button" href="{% url 'sessions_view' assessment_id=context.assessment.id %}">Volver</a>
+        </div>
+        
+        <div style="display: flex;">
+            <div style="flex: 1;">
+                <h3>Sesión</h3>
+                {% if session.state == 'created' %}
+                    <form id="addSessionForm" action="{% url 'session_set_state' %}" method="POST">
+                        {% csrf_token %}
+                        <button class="common-button" type="submit">Publicar</button>
+                        <input type="hidden" name="session_id" value="{{ session.id }}">
+                        <input type="hidden" name="new_state" value="waiting">
+                    </form>
+                    <br>
+                {% elif session.state == 'waiting' %}
+                    <form id="addSessionForm" action="{% url 'session_set_state' %}" method="POST">
+                        {% csrf_token %}
+                        <button class="common-button" type="submit">Iniciar</button>
+                        <input type="hidden" name="session_id" value="{{ session.id }}">
+                        <input type="hidden" name="new_state" value="in_process">
+                    </form>
+                    <br>
+                {% elif session.state == 'in_process' %}
+                    <form id="addSessionForm" action="{% url 'session_set_state' %}" method="POST">
+                        {% csrf_token %}
+                        <button class="common-button" type="submit">Finalizar</button>
+                        <input type="hidden" name="session_id" value="{{ session.id }}">
+                        <input type="hidden" name="new_state" value="finished">
+                    </form>
+                    <br>
+                {% endif %}
+                <p class="common-text"><b>Nombre sesión:</b> {{ session.name }} </p>
+                <p class="common-text"><b>Nombre evaluación:</b> {{ context.assessment.name }} </p>
+                <p class="common-text"><b>Estado:</b> <span id="session-state" data-state="{{ session.state }}"></span></p>
+
+            </div>
+
+            <div style="flex: 1;">
+                <h3>Gráfico de Progreso</h3>
+                <div style="display: flex; justify-content: center; align-items: center; max-width: 300px; margin: auto;">
+                    <canvas id="progressPieChart" style="width: 100%; height: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+        <br>
+        <hr>
+        <div style="display: flex;">
+            <div style="flex: 1;">
+                <h3>Detalles Estudiantes</h3>
+                <p class="common-text"><b>Total asistentes:</b> {{ context.students.total_count }} </p>
+                <p class="common-text"><b>Cantidad en desarrollo:</b> {{ context.students.developing_count }} </p>
+                <p class="common-text"><b>Cantitad finalizados:</b> {{ context.students.finished_count }} </p>
+            </div>
+
+            <div style="flex: 1;">
+                <h3>Estudiantes con Menor Rendimiento</h3>
+                <p class="common-text">No hay datos aún</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            
+        });
+
+        const ctx = document.getElementById('progressPieChart').getContext('2d');
+            const progressPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Aprobado', 'Reprobado', 'En Desarrollo'],
+                    datasets: [{
+                        data: [
+                            {{ context.students.passed_count }},
+                            {{ context.students.failed_count }},
+                            {{ context.students.developing_count }}
+                        ],
+                        backgroundColor: ['#4caf50', '#f44336', '#ff9800']
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white' // Set legend labels to white
+                            },
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            bodyColor: 'white', // Tooltip text color
+                            titleColor: 'white', // Tooltip title color
+                        }
+                    }
+                }
+            });
+
+        const stateAliases = {
+            'created': 'Creada',
+            'waiting': 'A la espera',
+            'in_process': 'En desarrollo',
+            'finished': 'Finalizada'
+        };
+        
+        const sessionStateElement = document.getElementById('session-state');
+        const sessionState = sessionStateElement.getAttribute('data-state');
+        sessionStateElement.textContent = stateAliases[sessionState] || sessionState;    
+    </script>
+{% endblock %}

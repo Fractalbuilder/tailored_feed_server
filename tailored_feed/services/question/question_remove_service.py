@@ -14,8 +14,8 @@ class QuestionRemoveService(QuestionRemoveServiceInterface):
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.remove)
-            parametros = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
-            self.exception_manager.throw_report(self, "remove", parametros, str(e))
+            parameters = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "remove", parameters, str(e))
     
 
     def remove_n_save(self, id: int):
@@ -24,5 +24,5 @@ class QuestionRemoveService(QuestionRemoveServiceInterface):
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.remove_n_save)
-            parametros = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
-            self.exception_manager.throw_report(self, "remove_n_save", parametros, str(e))
+            parameters = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "remove_n_save", parameters, str(e))

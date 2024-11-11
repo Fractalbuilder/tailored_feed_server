@@ -23,8 +23,8 @@ class DbRepository(DbRepositoryInterface):
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.start_transaction)
-            parametros = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
-            self.exception_manager.throw_report(self, "start_transaction", parametros, str(e))
+            parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "start_transaction", parameters, str(e))
 
     def save(self):
         """
@@ -40,8 +40,8 @@ class DbRepository(DbRepositoryInterface):
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.save)
-            parametros = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
-            self.exception_manager.throw_report(self, "save", parametros, str(e))
+            parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "save", parameters, str(e))
 
     def roll_back(self):
         """
@@ -57,8 +57,8 @@ class DbRepository(DbRepositoryInterface):
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.roll_back)
-            parametros = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
-            self.exception_manager.throw_report(self, "roll_back", parametros, str(e))
+            parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "roll_back", parameters, str(e))
 
 
     def close_transaction(self):
@@ -76,5 +76,5 @@ class DbRepository(DbRepositoryInterface):
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.close_transaction)
-            parametros = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
-            self.exception_manager.throw_report(self, "close_transaction", parametros, str(e))
+            parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "close_transaction", parameters, str(e))

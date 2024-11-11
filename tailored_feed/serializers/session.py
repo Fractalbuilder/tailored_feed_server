@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from tailored_feed.models import AssessmentSession
+from tailored_feed.models import Session
 
-class AssessmentSessionSerializer(serializers.ModelSerializer):
+class SessionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AssessmentSession
+        model = Session
         fields = ['assessmentId', 'creationDate', 'name', 'state']
         read_only_fields = ['creationDate']

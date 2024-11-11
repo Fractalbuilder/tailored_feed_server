@@ -2,8 +2,9 @@ from django.db import models
 from django.utils.timezone import now
 from tailored_feed.models.assessment.assessment import Assessment
 
-class AssessmentSession(models.Model):
+class Session(models.Model):
     class State(models.TextChoices):
+        CREATED = 'created', 'Created'
         WAITING = 'waiting', 'Waiting'
         IN_PROCESS = 'in_process', 'In Process'
         FINISHED = 'finished', 'Finished'
@@ -11,7 +12,7 @@ class AssessmentSession(models.Model):
     assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name="session_assessment")
     creationDate = models.DateTimeField(default=now, editable=False)
     name = models.CharField(max_length=80)
-    state = models.CharField(max_length=20, choices=State.choices, default=State.WAITING,)
+    state = models.CharField(max_length=20, choices=State.choices, default=State.CREATED,)
 
     class Meta:
         unique_together = ('assessment', 'creationDate')

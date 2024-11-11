@@ -16,5 +16,5 @@ class AssessmentRemoveRepository(AssessmentRemoveRepositoryInterface):
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.remove)
-            parametros = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
-            self.exception_manager.throw_report(self, "remove", parametros, str(e))
+            parameters = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "remove", parameters, str(e))

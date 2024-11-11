@@ -1,18 +1,18 @@
 import inspect
 from tailored_feed.services.common.exception_manager import ExceptionManager
-from tailored_feed.models.assessment.assessment_question import AssessmentQuestion
-from tailored_feed.services.question.question_add_service_interface import QuestionAddServiceInterface
+from tailored_feed.models.session.session import Session
+from tailored_feed.services.session.session_add_service_interface import SessionAddServiceInterface
 
-class QuestionAddService(QuestionAddServiceInterface):
+class SessionAddService(SessionAddServiceInterface):
 
     def __init__(self, add_repository):
         self.exception_manager = ExceptionManager()
         self.add_repository = add_repository
 
 
-    def add(self, question: AssessmentQuestion):
+    def add(self, session: Session):
         try:
-            return self.add_repository.add(question)
+            return self.add_repository.add(session=session)
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.add)
@@ -20,12 +20,9 @@ class QuestionAddService(QuestionAddServiceInterface):
             self.exception_manager.throw_report(self, "add", parameters, str(e))
     
 
-    def add_n_save(self, question: AssessmentQuestion):
+    def add_n_save(self, session: Session):
         try:
-            question = self.add(question)
-            question_dict = question.to_dict()
-
-            return question_dict
+            session = self.add(session)
             
         except Exception as e:            
             argspec = inspect.getfullargspec(self.add_n_save)

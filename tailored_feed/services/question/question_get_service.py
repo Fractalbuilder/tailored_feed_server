@@ -15,8 +15,8 @@ class QuestionGetService(QuestionGetServiceInterface):
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.by_id)
-            parametros = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
-            self.exception_manager.throw_report(self, "by_id", parametros, str(e))
+            parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "by_id", parameters, str(e))
 
 
     def by_assessment_id(self, assessment_id):
@@ -25,5 +25,5 @@ class QuestionGetService(QuestionGetServiceInterface):
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.by_assessment_id)
-            parametros = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
-            self.exception_manager.throw_report(self, "by_assessment_id", parametros, str(e))
+            parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "by_assessment_id", parameters, str(e))

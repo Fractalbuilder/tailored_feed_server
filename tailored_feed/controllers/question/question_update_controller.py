@@ -27,10 +27,10 @@ class QuestionUpdateController:
             )
             
         except Exception as e:
-            nombre_metodo = f"{__name__}.{inspect.currentframe().f_code.co_name}"
-            argspec = inspect.getfullargspec(lambda: view())
-            parametros = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
-            log_manager.log_report(nombre_metodo, parametros, str(e))
+            method_name = f"{__name__}.{inspect.currentframe().f_code.co_name}"
+            sig = inspect.signature(QuestionUpdateController.view)
+            param_names = [p.name for p in sig.parameters.values() if p.kind == p.POSITIONAL_OR_KEYWORD]
+            parameters = {k: v for k, v in locals().items() if k in param_names and k != 'self'}
 
             return redirect('error_page')
 
@@ -66,10 +66,11 @@ class QuestionUpdateController:
             messages.error(request, "Actualización fallida. " + str(e))
 
         except Exception as e:
-            nombre_metodo = f"{__name__}.{inspect.currentframe().f_code.co_name}"
-            argspec = inspect.getfullargspec(lambda: add())
-            parametros = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
-            log_manager.log_report(nombre_metodo, parametros, str(e))
+            method_name = f"{__name__}.{inspect.currentframe().f_code.co_name}"
+            sig = inspect.signature(QuestionUpdateController.update)
+            param_names = [p.name for p in sig.parameters.values() if p.kind == p.POSITIONAL_OR_KEYWORD]
+            parameters = {k: v for k, v in locals().items() if k in param_names and k != 'self'}
+            log_manager.log_report(method_name, parameters, str(e))
 
             return JsonResponse({'error':'Se produjo un error. Contacte al administrador'}, status=500)
 

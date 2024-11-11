@@ -33,10 +33,11 @@ class QuestionAddController:
                 {'context': context}
             )
         except Exception as e:
-            nombre_metodo = f"{__name__}.{inspect.currentframe().f_code.co_name}"
-            argspec = inspect.getfullargspec(lambda: view())
-            parametros = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
-            log_manager.log_report(nombre_metodo, parametros, str(e))
+            method_name = f"{__name__}.{inspect.currentframe().f_code.co_name}"
+            sig = inspect.signature(QuestionAddController.view)
+            param_names = [p.name for p in sig.parameters.values() if p.kind == p.POSITIONAL_OR_KEYWORD]
+            parameters = {k: v for k, v in locals().items() if k in param_names and k != 'self'}
+            
             return redirect('error_page')
     
     
@@ -74,7 +75,12 @@ class QuestionAddController:
             messages.error(request, "Creación fallida. " + str(e))
 
         except Exception as e:
-            log_manager.log_report(__name__, locals(), str(e))
+            method_name = f"{__name__}.{inspect.currentframe().f_code.co_name}"
+            sig = inspect.signature(QuestionAddController.add)
+            param_names = [p.name for p in sig.parameters.values() if p.kind == p.POSITIONAL_OR_KEYWORD]
+            parameters = {k: v for k, v in locals().items() if k in param_names and k != 'self'}
+            log_manager.log_report(method_name, parameters, str(e))
+
             return JsonResponse({'error': 'Se produjo un error. Contacte al administrador'}, status=500)
 
         return JsonResponse({'message': 'La pregunta se creó exitosamente'}, status=200)

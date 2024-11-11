@@ -1,0 +1,97 @@
+{% extends "common/layout.html" %}
+{% load static %}
+
+{% block body %}
+    {% include 'components/common/confirmation_modal.html' %}
+    {% include 'components/common/messages.html' %}
+    
+    <div id="main-container">
+        <div class="title-container">
+            <h1>Sessiones</h1>
+            <a class="common-button" href="{% url 'assessments_view' %}">Volver</a>
+        </div>
+        
+        <p class="common-text">Nueva sesión:</p>
+        <form id="addSessionForm" action="{% url 'session_add' %}" method="POST">
+            {% csrf_token %}
+            <input 
+                id="addSessionFormNameInput" 
+                style="margin-right: 4px;" 
+                type="text" 
+                name="name" 
+                placeholder="Nombre" 
+                value="{{ context.assessment.name }} - {% now 'Y-m-d H:i:s' %}" 
+                autofocus
+            >
+            <input type="hidden" name="assessment_id" value="{{ context.assessment.id }}">
+            <button class="common-button" type="submit">Crear</button>
+            <span id="addSessionFormNameError" class="common-text" style="display:none;"></span>
+        </form>
+
+        <br>
+        <hr>
+        {% if not sessions %}
+            <p class="common-text">No hay evaluaciones aún</p>
+        {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 5%;">No.</th>
+                    <th style="width: 40%;">Nombre</th>
+                    <th style="width: 15%;">Fecha Creación</th>
+                    <th style="width: 15%;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ session.name }}</td>
+                        <td>{{ session.creationDate|date:"Y-m-d H:i:s" }}</td>
+                        <td>
+                            <a class="common-button" href="{% url 'dashboard_view' session_id=session.id assessment_id=context.assessment.id %}">Dashboard</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const input = document.getElementById("addSessionFormNameInput");
+            input.focus();
+            input.setSelectionRange(input.value.length, input.value.length);
+        });
+
+        function handleDeleteAssessment(assessmentId) {
+            showConfirmationModal('¿Está seguro de eliminar esta evaluación?', function() {
+                const form = document.getElementById('deleteForm_' + assessmentId);
+
+                if (form) {
+                    form.submit();
+                }
+            });
+
+            document.getElementById('confirmBtn').focus();
+        }
+
+        document.getElementById('addSessionForm').addEventListener('submit', function(event) {
+            var addSessionFormNameInput = document.getElementById('addSessionFormNameInput');
+            var addSessionFormNameError = document.getElementById('addSessionFormNameError');
+            
+            if (addSessionFormNameInput.value.length > 80) {
+                event.preventDefault();
+                addSessionFormNameError.innerHTML = 'El nombre no puede exceder los 100 caracteres';
+                addSessionFormNameError.style.display = 'block';
+            } else if (addSessionFormNameInput.value.length == 0) {
+                event.preventDefault();
+                addSessionFormNameError.innerHTML = 'El nombre no puede estar vacío';
+                addSessionFormNameError.style.display = 'block';
+            } else {
+                addSessionFormNameError.style.display = 'none';
+            }
+        });
+    </script>
+{% endblock %}

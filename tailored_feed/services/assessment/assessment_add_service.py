@@ -16,8 +16,8 @@ class AssessmentAddService(AssessmentAddServiceInterface):
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.add)
-            parametros = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
-            self.exception_manager.throw_report(self, "add", parametros, str(e))
+            parameters = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "add", parameters, str(e))
     
 
     def add_n_save(self, name: str, owner: User):
@@ -29,5 +29,5 @@ class AssessmentAddService(AssessmentAddServiceInterface):
             
         except Exception as e:            
             argspec = inspect.getfullargspec(self.add_n_save)
-            parametros = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
-            self.exception_manager.throw_report(self, "add_n_save", parametros, str(e))
+            parameters = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "add_n_save", parameters, str(e))

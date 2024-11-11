@@ -35,7 +35,12 @@ class LoginView(APIView):
                 return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
             
         except Exception as e:
-            print(f"Error: {str(e)}")
+            method_name = f"{__name__}.{inspect.currentframe().f_code.co_name}"
+            sig = inspect.signature(LoginView.post)
+            param_names = [p.name for p in sig.parameters.values() if p.kind == p.POSITIONAL_OR_KEYWORD]
+            parameters = {k: v for k, v in locals().items() if k in param_names and k != 'self'}
+            log_manager.log_report(method_name, parameters, str(e))
+
             return Response({"error: ": "The process failed contact the administrator"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class RefreshSessionView(APIView):
@@ -74,6 +79,12 @@ class RefreshSessionView(APIView):
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
         except Exception:
+            method_name = f"{__name__}.{inspect.currentframe().f_code.co_name}"
+            sig = inspect.signature(RefreshSessionView.post)
+            param_names = [p.name for p in sig.parameters.values() if p.kind == p.POSITIONAL_OR_KEYWORD]
+            parameters = {k: v for k, v in locals().items() if k in param_names and k != 'self'}
+            log_manager.log_report(method_name, parameters, str(e))
+
             return Response({"error: ": "The process failed contact the administrator"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
