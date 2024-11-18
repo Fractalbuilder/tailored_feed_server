@@ -3,11 +3,17 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from tailored_feed.exceptions.content_error import ContentError
 from tailored_feed.services.common.log_manager import LogManager
+from tailored_feed.repositories.assessment.assessment_add_repository import AssessmentAddRepository
+from tailored_feed.repositories.assessment.assessment_get_repository import AssessmentGetRepository
 from tailored_feed.repositories.question.question_remove_repository import QuestionRemoveRepository
+from tailored_feed.services.assessment.assessment_add_service import AssessmentAddService
+from tailored_feed.services.assessment.assessment_get_service import AssessmentGetService
 from tailored_feed.services.question.question_remove_service import QuestionRemoveService
 
 log_manager = LogManager()
-question_remove_service = QuestionRemoveService(QuestionRemoveRepository())
+assessment_add_service = AssessmentAddService(AssessmentAddRepository())
+assessment_get_service = AssessmentGetService(AssessmentGetRepository())
+question_remove_service = QuestionRemoveService(QuestionRemoveRepository(), assessment_add_service)
 
 class QuestionRemoveController:
 
@@ -19,7 +25,8 @@ class QuestionRemoveController:
             
             id = request.POST.get('id')
             assessment_id = request.POST.get('assessment_id')
-            question_remove_service.remove_n_save(id=id)
+            assessment = assessment_get_service.by_id(assessment_id)
+            question_remove_service.remove_n_save(id=id, assessment=assessment)
             messages.success(request, 'La pregunta se eliminó exitosamente')
 
         except ContentError as e:

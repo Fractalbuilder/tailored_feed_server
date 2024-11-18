@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from tailored_feed.exceptions.content_error import ContentError
 from tailored_feed.services.common.log_manager import LogManager
+from tailored_feed.models.assessment.assessment import Assessment
 from tailored_feed.repositories.assessment.assessment_add_repository import AssessmentAddRepository
 from tailored_feed.services.assessment.assessment_add_service import AssessmentAddService
 
@@ -18,7 +19,8 @@ class AssessmentAddController:
                 raise ContentError('La petición no usa el método POST')
             
             name = request.POST.get('name')
-            assessment_add_service.add_n_save(name=name, owner=request.user)
+            assessment = Assessment(name=name, owner=request.user)
+            assessment_add_service.add_n_save(assessment)
             messages.success(request, 'La evaluación se creó exitosamente')
 
         except ContentError as e:

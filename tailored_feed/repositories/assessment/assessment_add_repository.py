@@ -10,9 +10,8 @@ class AssessmentAddRepository(SessionAddRepositoryInterface):
         self.exception_manager = ExceptionManager()
 
 
-    def add(self, name: str, owner: User):
+    def add(self, assessment: Assessment):
         try:
-            assessment = Assessment(name=name, owner=owner)
             assessment.save()
 
             return assessment

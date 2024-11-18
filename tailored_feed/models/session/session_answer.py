@@ -7,5 +7,5 @@ from tailored_feed.models.session.session_student import SessionStudent
 class SessionAnswer(models.Model):
     assessment_question = models.ForeignKey(AssessmentQuestion, on_delete=models.CASCADE, related_name="session_answer_question")
     session_student = models.ForeignKey(SessionStudent, on_delete=models.CASCADE, related_name="session_answer_student")
-    optionanswered = models.IntegerField()
+    optionAnswered = models.IntegerField()
     creationDate = models.DateTimeField(default=now, editable=False)

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from tailored_feed.models.assessment.assessment import Assessment
 
 class QuestionRemoveServiceInterface(ABC):
 
@@ -7,5 +8,5 @@ class QuestionRemoveServiceInterface(ABC):
         pass
 
     @abstractmethod
-    def remove_n_save(self, id: int):
+    def remove_n_save(self, id: int, assessment: Assessment):
         pass

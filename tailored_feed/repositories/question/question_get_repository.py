@@ -21,7 +21,8 @@ class QuestionGetRepository(QuestionGetRepositoryInterface):
 
     def by_assessment_id(self, assessment_id: int):
         try:
-            return AssessmentQuestion.objects.filter(assessment_id=assessment_id).order_by('-id')
+            a = AssessmentQuestion.objects.filter(assessment_id=assessment_id).order_by('id')
+            return a
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.by_assessment_id)

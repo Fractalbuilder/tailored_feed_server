@@ -17,6 +17,7 @@ class DashboardViewController:
         try:
             session = session_get_service.by_id(session_id)
             assessment_name = session.assessment.name
+            total_questions = session.assessment.totalQuestions
             students_developing_count = 8
             students_finished_count = 12
             students_passed_count = 10
@@ -32,7 +33,8 @@ class DashboardViewController:
             context = {
                 'assessment': {
                     'id': assessment_id,
-                    'name': assessment_name
+                    'name': assessment_name,
+                    'total_questions': total_questions
                 },
                 'students': {
                     'total_count': students_passed_count + students_failed_count + students_developing_count,

@@ -1,6 +1,6 @@
 import inspect
 from tailored_feed.services.common.exception_manager import ExceptionManager
-from tailored_feed.models.user import User
+from tailored_feed.models.assessment.assessment import Assessment
 from tailored_feed.services.assessment.assessment_add_service_interface import AssessmentAddServiceInterface
 
 class AssessmentAddService(AssessmentAddServiceInterface):
@@ -10,9 +10,9 @@ class AssessmentAddService(AssessmentAddServiceInterface):
         self.add_repository = add_repository
 
 
-    def add(self, name: str, owner: User):
+    def add(self, assessment: Assessment):
         try:
-            return self.add_repository.add(name=name, owner=owner)
+            return self.add_repository.add(assessment)
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.add)
@@ -20,9 +20,9 @@ class AssessmentAddService(AssessmentAddServiceInterface):
             self.exception_manager.throw_report(self, "add", parameters, str(e))
     
 
-    def add_n_save(self, name: str, owner: User):
+    def add_n_save(self, assessment: Assessment):
         try:
-            assessment = self.add(name=name, owner=owner)
+            assessment = self.add(assessment)
             assessment_dict = assessment.to_dict()
 
             return assessment_dict

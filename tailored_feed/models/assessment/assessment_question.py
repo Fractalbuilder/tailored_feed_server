@@ -7,6 +7,7 @@ class AssessmentQuestion(models.Model):
     options = models.JSONField()
     feedback_text = models.TextField(blank=True, null=True)
     feedback_image = models.ImageField(upload_to='feedback_images/', blank=True, null=True)
+    questionIndex = models.IntegerField()
 
     def __str__(self):
         return f"Question {self.statement} for assessment {self.assessment.name}"

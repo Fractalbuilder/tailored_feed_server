@@ -41,6 +41,7 @@
                 {% endif %}
                 <p class="common-text"><b>Nombre sesión:</b> {{ session.name }} </p>
                 <p class="common-text"><b>Nombre evaluación:</b> {{ context.assessment.name }} </p>
+                <p class="common-text"><b>Total preguntas:</b> {{ context.assessment.total_questions }} </p>
                 <p class="common-text"><b>Estado:</b> <span id="session-state" data-state="{{ session.state }}"></span></p>
 
             </div>
@@ -93,13 +94,13 @@
                     plugins: {
                         legend: {
                             labels: {
-                                color: 'white' // Set legend labels to white
+                                color: 'white'
                             },
                             position: 'bottom'
                         },
                         tooltip: {
-                            bodyColor: 'white', // Tooltip text color
-                            titleColor: 'white', // Tooltip title color
+                            bodyColor: 'white',
+                            titleColor: 'white',
                         }
                     }
                 }

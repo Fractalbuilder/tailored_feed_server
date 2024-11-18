@@ -4,5 +4,5 @@ from tailored_feed.models.user import User
 class AssessmentAddRepositoryInterface(ABC):
 
     @abstractmethod
-    def add(self, name: str, owner: User):
+    def add(self, assessment: Assessment):
         pass

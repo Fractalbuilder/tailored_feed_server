@@ -22,7 +22,7 @@ class SessionGetService(SessionGetServiceInterface):
     
     def by_assessment_id(self, assessment_id):
         try:
-            return self.get_repository.by_assessment_id(assessment_id)
+            return self.get_repository.by_assessment_id(assessment_id).order_by('-id')
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.by_assessment_id)

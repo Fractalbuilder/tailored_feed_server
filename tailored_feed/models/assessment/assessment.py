@@ -7,6 +7,7 @@ class Assessment(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="assessment_owner")
     creationDate = models.DateTimeField(default=now, editable=False)
     editable = models.BooleanField(default=True)
+    totalQuestions = models.IntegerField(blank=True, null=True, default=0)
 
     def to_dict(self):
 
