@@ -43,6 +43,7 @@ class LoginView(APIView):
 
             return Response({"error: ": "The process failed contact the administrator"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class RefreshSessionView(APIView):
     def post(self, request):
         refresh_input = request.data.get('refresh')
@@ -90,22 +91,32 @@ class RefreshSessionView(APIView):
 
 class UserView(APIView):
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
+        try:
+            serializer = UserSerializer(data=request.data)
 
-        if serializer.is_valid():
-            user = serializer.save()
-            refresh_token = RefreshToken.for_user(user)
-            refresh_token['username'] = user.username
-            refresh_str = str(refresh_token)
-            access_str = str(refresh_token.access_token)
+            if serializer.is_valid():
+                user = serializer.save()
+                refresh_token = RefreshToken.for_user(user)
+                refresh_token['username'] = user.username
+                refresh_str = str(refresh_token)
+                access_str = str(refresh_token.access_token)
 
-            user_id = refresh_token['user_id']
-            redis_conn = get_redis_connection('default')
-            redis_conn.set(f"refresh_user_{user_id}", refresh_str)
+                user_id = refresh_token['user_id']
+                redis_conn = get_redis_connection('default')
+                redis_conn.set(f"refresh_user_{user_id}", refresh_str)
 
-            return Response({
-                'refresh': refresh_str,
-                'access': access_str
-            }, status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response({
+                    'refresh': refresh_str,
+                    'access': access_str
+                }, status=status.HTTP_201_CREATED)
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            method_name = f"{__name__}.{inspect.currentframe().f_code.co_name}"
+            sig = inspect.signature(LoginView.post)
+            param_names = [p.name for p in sig.parameters.values() if p.kind == p.POSITIONAL_OR_KEYWORD]
+            parameters = {k: v for k, v in locals().items() if k in param_names and k != 'self'}
+            log_manager.log_report(method_name, parameters, str(e))
+
+            return Response({"error: ": "The process failed contact the administrator"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
