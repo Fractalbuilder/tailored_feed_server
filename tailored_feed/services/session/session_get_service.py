@@ -28,3 +28,13 @@ class SessionGetService(SessionGetServiceInterface):
             argspec = inspect.getfullargspec(self.by_assessment_id)
             parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
             self.exception_manager.throw_report(self, "by_assessment_id", parameters, str(e))
+
+    
+    def all_active(self):
+        try:
+            return self.get_repository.all_active()
+
+        except Exception as e:
+            argspec = inspect.getfullargspec(self.all_active)
+            parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "all_active", parameters, str(e))

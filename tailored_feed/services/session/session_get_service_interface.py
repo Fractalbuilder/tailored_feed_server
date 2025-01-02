@@ -9,3 +9,7 @@ class SessionGetServiceInterface(ABC):
     @abstractmethod
     def by_assessment_id(self, assessment_id):
         pass
+
+    @abstractmethod
+    def all_active(self):
+        pass

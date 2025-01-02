@@ -14,6 +14,7 @@ from tailored_feed.controllers.question.question_update_controller import Questi
 from tailored_feed.controllers.session.sessions_view_controller import SessionsViewController
 from tailored_feed.controllers.session.session_add_controller import SessionAddController
 from tailored_feed.controllers.session.session_set_state_controller import SessionSetStateController
+from tailored_feed.controllers.session.session_student_add_controller import SessionStudentAddController
 from tailored_feed.controllers.session.dashboard.dashboard_view_controller import DashboardViewController
 
 urlpatterns = [
@@ -38,4 +39,6 @@ urlpatterns = [
     path('session/add/', SessionAddController.add, name='session_add'),
     path('session/<int:session_id>/<int:assessment_id>', DashboardViewController.view, name='dashboard_view'),
     path('session/set-state/', SessionSetStateController.set_state, name='session_set_state'),
+    path('session_student/add/', SessionStudentAddController.add, name='session_student_add'),
+    path('sse/assessments/', views.sse_assessments, name='sse_assessments'),   
 ]

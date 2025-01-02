@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'tailored_feed',
     'rest_framework',
     'rest_framework_simplejwt',
+    'channels'
 ]
 
 MIDDLEWARE = [
@@ -183,6 +184,17 @@ LOGGING = {
             'handlers': ['file'],
             'level': 'ERROR',
             'propagate': False,
+        },
+    },
+}
+
+ASGI_APPLICATION = 'tailored_feed_server.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
         },
     },
 }
