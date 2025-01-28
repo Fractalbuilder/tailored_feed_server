@@ -16,7 +16,7 @@ class QuestionsArrangeService(QuestionsArrangeServiceInterface):
             questions = self.get_repository.by_assessment_id(assessment_id)
 
             for index, question in enumerate(questions):
-                question.questionIndex = index
+                question.index = index
                 question.save()
 
         except Exception as e:

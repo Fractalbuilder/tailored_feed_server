@@ -1,18 +1,18 @@
 import inspect
 from tailored_feed.services.common.exception_manager import ExceptionManager
-from tailored_feed.models.session.session import Session
-from tailored_feed.repositories.session.session_add_repository_interface import SessionAddRepositoryInterface
+from tailored_feed.models.session.session_answer import SessionAnswer
+from tailored_feed.repositories.session_answer.session_answer_add_repository_interface import SessionAnswerAddRepositoryInterface
 
-class SessionStudentAddRepository(SessionStudentAddRepositoryInterface):
+class SessionAnswerAddRepository(SessionAnswerAddRepositoryInterface):
 
     def __init__(self):
         self.exception_manager = ExceptionManager()
 
 
-    def add(self, session_student: SessionStudent):
+    def add(self, session_answer):
         try:
-            session_student.save()
-            return sessionStudent
+            session_answer.save()
+            return session_answer
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.add)

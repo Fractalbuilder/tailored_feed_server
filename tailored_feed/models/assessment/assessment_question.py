@@ -7,7 +7,10 @@ class AssessmentQuestion(models.Model):
     options = models.JSONField()
     feedback_text = models.TextField(blank=True, null=True)
     feedback_image = models.ImageField(upload_to='feedback_images/', blank=True, null=True)
-    questionIndex = models.IntegerField()
+    index = models.IntegerField()
+
+    class Meta:
+        unique_together = (('assessment', 'index'),)
 
     def __str__(self):
         return f"Question {self.statement} for assessment {self.assessment.name}"

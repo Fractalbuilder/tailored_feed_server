@@ -62,7 +62,7 @@ class QuestionAddController:
                 statement=statement,
                 options=options,
                 feedback_text=feedback_text,
-                questionIndex=-1
+                index=-1
             )
             
             question_add_service.add_n_save(question, assessment, request.FILES)

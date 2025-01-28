@@ -23,6 +23,7 @@ class SessionAddService(SessionAddServiceInterface):
     def add_n_save(self, session: Session):
         try:
             session = self.add(session)
+            return session
             
         except Exception as e:            
             argspec = inspect.getfullargspec(self.add_n_save)

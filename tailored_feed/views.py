@@ -11,7 +11,7 @@ def index(request):
     return render(request, "common/index.html")
 
 
-def sse_assessments(request):
+def sse_sessions(request):
     def event_stream():
         print("New connection")
         counter = 0
@@ -19,7 +19,7 @@ def sse_assessments(request):
         while True:
             sessions = session_get_service.all_active()
             sessions_data = [
-                {"id": session.id, "name": session.name}
+                {"id": session.id, "name": session.name, "totalQuestions": session.assessment.totalQuestions}
                 for session in sessions
             ]
 

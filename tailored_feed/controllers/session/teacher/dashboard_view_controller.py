@@ -1,4 +1,5 @@
-import inspect
+import inspect, redis
+from django.conf import settings
 from django.shortcuts import render, redirect
 from tailored_feed.services.common.log_manager import LogManager
 from tailored_feed.repositories.assessment.assessment_get_repository import AssessmentGetRepository
@@ -6,6 +7,7 @@ from tailored_feed.repositories.session.session_get_repository import SessionGet
 from tailored_feed.services.assessment.assessment_get_service import AssessmentGetService
 from tailored_feed.services.session.session_get_service import SessionGetService
 
+redis_client = redis.StrictRedis(host="127.0.0.1", port=6381, db=0)
 log_manager = LogManager()
 session_get_service = SessionGetService(SessionGetRepository())
 assessment_get_service = AssessmentGetService(AssessmentGetRepository())
@@ -18,10 +20,18 @@ class DashboardViewController:
             session = session_get_service.by_id(session_id)
             assessment_name = session.assessment.name
             total_questions = session.assessment.totalQuestions
-            students_developing_count = 8
-            students_finished_count = 12
-            students_passed_count = 10
-            students_failed_count = 2
+
+            assistants_connected_key = f"session_{session.id}_assistants_connected"
+            assistants_in_process_key = f"session_{session.id}_assistants_in_process"
+            assistants_finished_key = f"session_{session.id}_assistants_finished"
+            assistants_connected = int(redis_client.get(assistants_connected_key) or 0)
+            assistants_in_process = int(redis_client.get(assistants_in_process_key) or 0)
+            assistants_finished = int(redis_client.get(assistants_finished_key) or 0)
+
+            students_developing_count = assistants_in_process
+            students_finished_count = assistants_finished
+            students_passed_count = 11111
+            students_failed_count = 22222
 
             state_aliases = {
                 "created": "Creada",
@@ -29,6 +39,9 @@ class DashboardViewController:
                 "in_process": "En desarrollo",
                 "finished": "Finalizada"
             }
+
+            backend_ip = settings.BACKEND_IP
+            channels_port = settings.CHANNELS_PORT
             
             context = {
                 'assessment': {
@@ -37,7 +50,7 @@ class DashboardViewController:
                     'total_questions': total_questions
                 },
                 'students': {
-                    'total_count': students_passed_count + students_failed_count + students_developing_count,
+                    'total_count': assistants_connected,
                     'developing_count': students_developing_count,
                     'finished_count': students_finished_count,
                     'passed_count': students_passed_count,
@@ -49,7 +62,7 @@ class DashboardViewController:
             return render(
                 request, 
                 'session/dashboard_view.html', 
-                {'context': context, 'session': session}
+                {'context': context, 'session': session, 'backend': backend_ip, 'channelsPort': channels_port}
             )
 
         except Exception as e:

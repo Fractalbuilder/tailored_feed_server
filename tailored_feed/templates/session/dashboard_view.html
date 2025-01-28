@@ -15,27 +15,30 @@
             <div style="flex: 1;">
                 <h3>Sesión</h3>
                 {% if session.state == 'created' %}
-                    <form id="addSessionForm" action="{% url 'session_set_state' %}" method="POST">
+                    <form id="addSessionForm" action="{% url 'session_handle_state' %}" method="POST">
                         {% csrf_token %}
                         <button class="common-button" type="submit">Publicar</button>
                         <input type="hidden" name="session_id" value="{{ session.id }}">
                         <input type="hidden" name="new_state" value="waiting">
+                        <input type="hidden" name="assessment_id" value="{{ context.assessment.id }}">
                     </form>
                     <br>
                 {% elif session.state == 'waiting' %}
-                    <form id="addSessionForm" action="{% url 'session_set_state' %}" method="POST">
+                    <form id="addSessionForm" action="{% url 'session_handle_state' %}" method="POST">
                         {% csrf_token %}
                         <button class="common-button" type="submit">Iniciar</button>
                         <input type="hidden" name="session_id" value="{{ session.id }}">
                         <input type="hidden" name="new_state" value="in_process">
+                        <input type="hidden" name="assessment_id" value="{{ context.assessment.id }}">
                     </form>
                     <br>
                 {% elif session.state == 'in_process' %}
-                    <form id="addSessionForm" action="{% url 'session_set_state' %}" method="POST">
+                    <form id="addSessionForm" action="{% url 'session_handle_state' %}" method="POST">
                         {% csrf_token %}
                         <button class="common-button" type="submit">Finalizar</button>
                         <input type="hidden" name="session_id" value="{{ session.id }}">
                         <input type="hidden" name="new_state" value="finished">
+                        <input type="hidden" name="assessment_id" value="{{ context.assessment.id }}">
                     </form>
                     <br>
                 {% endif %}
@@ -43,7 +46,6 @@
                 <p class="common-text"><b>Nombre evaluación:</b> {{ context.assessment.name }} </p>
                 <p class="common-text"><b>Total preguntas:</b> {{ context.assessment.total_questions }} </p>
                 <p class="common-text"><b>Estado:</b> <span id="session-state" data-state="{{ session.state }}"></span></p>
-
             </div>
 
             <div style="flex: 1;">
@@ -58,9 +60,21 @@
         <div style="display: flex;">
             <div style="flex: 1;">
                 <h3>Detalles Estudiantes</h3>
-                <p class="common-text"><b>Total asistentes:</b> {{ context.students.total_count }} </p>
-                <p class="common-text"><b>Cantidad en desarrollo:</b> {{ context.students.developing_count }} </p>
-                <p class="common-text"><b>Cantitad finalizados:</b> {{ context.students.finished_count }} </p>
+                <div style="display: flex; align-items: center;"> 
+                    <p class="common-text"><b>Conectados:</b> </p>
+                    <span id="assistants-connected-value" class="common-text" style="margin-left: 5px;">{{ context.students.total_count }}</span> 
+                
+                </div>
+                <div style="display: flex; align-items: center;"> 
+                    <p class="common-text"><b>En desarrollo:</b> </p>
+                    <span id="assistants-in-process-value" class="common-text" style="margin-left: 5px;">{{ context.students.developing_count }}</span> 
+                
+                </div>
+                <div style="display: flex; align-items: center;"> 
+                    <p class="common-text"><b>Finalizados:</b> </p>
+                    <span id="assistants-finished-value" class="common-text" style="margin-left: 5px;">{{ context.students.finished_count }}</span> 
+                
+                </div>
             </div>
 
             <div style="flex: 1;">
@@ -73,7 +87,36 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            const dashboardSocket = new WebSocket(`ws://{{ backend }}:{{ channelsPort }}/ws/dashboard/{{ session.id }}/`);
             
+            dashboardSocket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                
+                if(data.session_id === '{{ session.id }}') {
+                    let type = data.type;
+
+                    if(type == "update_connected") {
+                        const assistantsConnectedElement = document
+                            .getElementById('assistants-connected-value');
+
+                        assistantsConnectedElement.textContent = `${data.assistants_connected}`;
+                    } else if(type == "update_completeness"){
+                        const assistantsInProcessElement = document
+                            .getElementById('assistants-in-process-value');
+
+                        const assistantsFinishedElement = document
+                            .getElementById('assistants-finished-value');
+
+                        assistantsInProcessElement.textContent = `${data.assistants_in_process}`;
+                        assistantsFinishedElement.textContent = `${data.assistants_finished}`;
+                    }
+                    
+                }
+            };
+
+            dashboardSocket.onclose = function() {
+                console.error('Dashboard WebSocket closed unexpectedly');
+            };
         });
 
         const ctx = document.getElementById('progressPieChart').getContext('2d');

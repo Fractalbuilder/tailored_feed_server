@@ -13,9 +13,9 @@ from tailored_feed.controllers.question.question_remove_controller import Questi
 from tailored_feed.controllers.question.question_update_controller import QuestionUpdateController
 from tailored_feed.controllers.session.sessions_view_controller import SessionsViewController
 from tailored_feed.controllers.session.session_add_controller import SessionAddController
-from tailored_feed.controllers.session.session_set_state_controller import SessionSetStateController
 from tailored_feed.controllers.session.session_student_add_controller import SessionStudentAddController
-from tailored_feed.controllers.session.dashboard.dashboard_view_controller import DashboardViewController
+from tailored_feed.controllers.session.teacher.dashboard_view_controller import DashboardViewController
+from tailored_feed.controllers.session.teacher.session_teacher_controller import SessionTeacherController
 
 urlpatterns = [
     path("", views.index, name="index"),
@@ -38,7 +38,7 @@ urlpatterns = [
     path('session/<int:assessment_id>', SessionsViewController.view, name='sessions_view'),
     path('session/add/', SessionAddController.add, name='session_add'),
     path('session/<int:session_id>/<int:assessment_id>', DashboardViewController.view, name='dashboard_view'),
-    path('session/set-state/', SessionSetStateController.set_state, name='session_set_state'),
+    path('session/handle-state/', SessionTeacherController.handle_state, name='session_handle_state'),
     path('session_student/add/', SessionStudentAddController.add, name='session_student_add'),
-    path('sse/assessments/', views.sse_assessments, name='sse_assessments'),   
+    path('sse/sessions/', views.sse_sessions, name='sse_sessions'),   
 ]

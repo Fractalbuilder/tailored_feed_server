@@ -21,9 +21,19 @@ class QuestionGetService(QuestionGetServiceInterface):
 
     def by_assessment_id(self, assessment_id):
         try:
-            return self.get_repository.by_assessment_id(assessment_id).order_by('-id')
+            return self.get_repository.by_assessment_id(assessment_id)
 
         except Exception as e:
             argspec = inspect.getfullargspec(self.by_assessment_id)
             parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
             self.exception_manager.throw_report(self, "by_assessment_id", parameters, str(e))
+
+
+    def by_index_and_assessment_id(self, index, assessment_id):
+        try:
+            return self.get_repository.by_index_and_assessment_id(index, assessment_id)
+
+        except Exception as e:
+            argspec = inspect.getfullargspec(self.by_index_and_assessment_id)
+            parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "by_index_and_assessment_id", parameters, str(e))

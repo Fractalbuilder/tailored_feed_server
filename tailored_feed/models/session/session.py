@@ -17,6 +17,3 @@ class Session(models.Model):
     class Meta:
         unique_together = ('assessment', 'creationDate')
         ordering = ['creationDate']
-
-    def __str__(self):
-        return f"Session {self.name} for {self.assessmentId.name}"
