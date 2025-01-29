@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'tailored_feed',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -199,5 +201,5 @@ CHANNEL_LAYERS = {
     },
 }
 
-BACKEND_IP = '192.168.1.116'
+BACKEND_IP = '192.168.1.120'
 CHANNELS_PORT = '8083'
