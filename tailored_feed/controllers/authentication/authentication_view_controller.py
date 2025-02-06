@@ -26,9 +26,9 @@ class AuthenticationViewController():
                         if user.role == 'teacher':
                             return redirect('assessments_view')
                         else:
-                            messages.error(request, "Unauthorized access")
+                            messages.error(request, "Usted no cuenta con permisos")
                     else:
-                        messages.error(request, "Invalid username or password")
+                        messages.error(request, "Usuario o clave inválido")
             else:
                 form = LoginForm()
 

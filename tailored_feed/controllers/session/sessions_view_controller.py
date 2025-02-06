@@ -1,5 +1,6 @@
 import inspect
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from tailored_feed.services.common.log_manager import LogManager
 from tailored_feed.repositories.assessment.assessment_get_repository import AssessmentGetRepository
 from tailored_feed.repositories.session.session_get_repository import SessionGetRepository
@@ -13,6 +14,7 @@ assessment_get_service = AssessmentGetService(AssessmentGetRepository())
 class SessionsViewController:
 
     @staticmethod
+    @login_required
     def view(request, assessment_id):
         try:
             sessions = session_get_service.by_assessment_id(assessment_id)

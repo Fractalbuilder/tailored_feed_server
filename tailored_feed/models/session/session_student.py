@@ -7,9 +7,10 @@ class SessionStudent(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name="session_student_ses")
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="session_student_stu")
     creationDate = models.DateTimeField(default=now, editable=False)
-    approvedQuestions = models.IntegerField(blank=True, null=True)
-    failedQuestions = models.IntegerField(blank=True, null=True)
+    correctAnswers = models.IntegerField(default=0)
+    wrongAnswers = models.IntegerField(default=0)
     currentQuestionIndex = models.IntegerField()
+    grade = models.FloatField(blank=True, null=True, default=0)
 
     class Meta:
         unique_together = ('session', 'student')

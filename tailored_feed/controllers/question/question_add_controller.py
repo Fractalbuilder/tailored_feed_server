@@ -1,10 +1,10 @@
-import inspect
-import json
+import inspect, json
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from tailored_feed.exceptions.content_error import ContentError
 from tailored_feed.services.common.log_manager import LogManager
+from django.contrib.auth.decorators import login_required
 from tailored_feed.repositories.assessment.assessment_add_repository import AssessmentAddRepository
 from tailored_feed.repositories.assessment.assessment_get_repository import AssessmentGetRepository
 from tailored_feed.repositories.question.question_get_repository import QuestionGetRepository
@@ -16,14 +16,15 @@ from tailored_feed.repositories.question.question_add_repository import Question
 from tailored_feed.services.question.question_add_service import QuestionAddService
 
 log_manager = LogManager()
-assessment_add_service = AssessmentAddService(AssessmentAddRepository())
 assessment_get_service = AssessmentGetService(AssessmentGetRepository())
+assessment_add_service = AssessmentAddService(AssessmentAddRepository())
 questions_arrange_service = QuestionsArrangeService(QuestionGetRepository())
 question_add_service = QuestionAddService(QuestionAddRepository(), questions_arrange_service, assessment_add_service)
 
 class QuestionAddController:
 
     @staticmethod
+    @login_required
     def view(request, assessment_id):
         try:
             context = {
@@ -45,6 +46,7 @@ class QuestionAddController:
     
     
     @staticmethod
+    @login_required
     def add(request):
         try:
             if request.method != 'POST':
@@ -65,8 +67,7 @@ class QuestionAddController:
                 index=-1
             )
             
-            question_add_service.add_n_save(question, assessment, request.FILES)
-
+            question_add_service.add_n_save(question, request.FILES)
             messages.success(request, 'La pregunta se creó exitosamente')
 
         except ContentError as e:

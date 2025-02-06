@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from tailored_feed.exceptions.content_error import ContentError
 from tailored_feed.services.common.log_manager import LogManager
+from django.contrib.auth.decorators import login_required
 from tailored_feed.models.session.session import Session
 from tailored_feed.repositories.assessment.assessment_get_repository import AssessmentGetRepository
 from tailored_feed.repositories.session.session_add_repository import SessionAddRepository
@@ -16,6 +17,7 @@ session_add_service = SessionAddService(SessionAddRepository())
 class SessionStudentAddController:
 
     @staticmethod
+    @login_required
     def add(request):
         try:
             if request.method != 'POST':

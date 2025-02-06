@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from tailored_feed.exceptions.content_error import ContentError
 from tailored_feed.services.common.log_manager import LogManager
+from django.contrib.auth.decorators import login_required
 from tailored_feed.repositories.assessment.assessment_remove_repository import AssessmentRemoveRepository
 from tailored_feed.services.assessment.assessment_remove_service import AssessmentRemoveService
 
@@ -12,6 +13,7 @@ assessment_remove_service = AssessmentRemoveService(AssessmentRemoveRepository()
 class AssessmentRemoveController:
 
     @staticmethod
+    @login_required
     def remove(request):
         try:
             if request.method != 'POST':

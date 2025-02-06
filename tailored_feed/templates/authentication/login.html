@@ -1,23 +1,33 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static 'css/commonStyles.css' %}" rel="stylesheet">
+    <link href="{% static 'css/loginStyles.css' %}" rel="stylesheet">
     <title>Login</title>
 </head>
 <body>
-    <h2>Login</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Login</button>
-    </form>
-    {% if messages %}
-        <ul>
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+    <div class="container">
+        <img src="{% static 'images/tailored_feed_icon.svg' %}" alt="Logo">
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Usuario" autofocus>
+            <input type="password" name="password" placeholder="Clave" autofocus>
+            <div style="padding-top: 15px;">
+                <button style="width: 100%;" class="common-button" type="submit">Ingresar</button>
+            </div>
+            
+        </form>
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li class="common-text">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
 </body>
 </html>

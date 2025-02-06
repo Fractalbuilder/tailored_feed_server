@@ -2,19 +2,28 @@ import inspect, redis
 from django.conf import settings
 from django.shortcuts import render, redirect
 from tailored_feed.services.common.log_manager import LogManager
+from django.contrib.auth.decorators import login_required
+from tailored_feed.repositories.session_student.session_student_get_repository import SessionStudentGetRepository
 from tailored_feed.repositories.assessment.assessment_get_repository import AssessmentGetRepository
 from tailored_feed.repositories.session.session_get_repository import SessionGetRepository
+from tailored_feed.repositories.user.user_get_repository import UserGetRepository
 from tailored_feed.services.assessment.assessment_get_service import AssessmentGetService
 from tailored_feed.services.session.session_get_service import SessionGetService
+from tailored_feed.services.session_student.session_student_get_service import SessionStudentGetService
 
 redis_client = redis.StrictRedis(host="127.0.0.1", port=6381, db=0)
 log_manager = LogManager()
 session_get_service = SessionGetService(SessionGetRepository())
 assessment_get_service = AssessmentGetService(AssessmentGetRepository())
 
+session_student_get_service = SessionStudentGetService(
+    SessionStudentGetRepository(), session_get_service, UserGetRepository()
+)
+
 class DashboardViewController:
 
     @staticmethod
+    @login_required
     def view(request, session_id, assessment_id):
         try:
             session = session_get_service.by_id(session_id)
@@ -30,8 +39,6 @@ class DashboardViewController:
 
             students_developing_count = assistants_in_process
             students_finished_count = assistants_finished
-            students_passed_count = 11111
-            students_failed_count = 22222
 
             state_aliases = {
                 "created": "Creada",
@@ -52,12 +59,14 @@ class DashboardViewController:
                 'students': {
                     'total_count': assistants_connected,
                     'developing_count': students_developing_count,
-                    'finished_count': students_finished_count,
-                    'passed_count': students_passed_count,
-                    'failed_count': students_failed_count
+                    'finished_count': students_finished_count
                 },
                 'state_aliases': state_aliases
             }
+
+            if session.state == "finished":
+                session_students = session_student_get_service.by_session_with_students(session.id)
+                context['session_students'] = session_students
 
             return render(
                 request, 

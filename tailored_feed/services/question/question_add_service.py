@@ -22,10 +22,11 @@ class QuestionAddService(QuestionAddServiceInterface):
             parameters = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
             self.exception_manager.throw_report(self, "add", parameters, str(e))
     
-
-    def add_n_save(self, question: AssessmentQuestion, assessment: Assessment, file):
+    
+    def add_n_save(self, question: AssessmentQuestion, file):
         try:
             question = self.add(question)
+            assessment = question.assessment
             
             if 'feedback_image' in file:
                 feedback_image = file['feedback_image']
@@ -38,6 +39,7 @@ class QuestionAddService(QuestionAddServiceInterface):
             self.assessment_add_service.add_n_save(assessment)
             
             return question.to_dict()
+        
             
         except Exception as e:            
             argspec = inspect.getfullargspec(self.add_n_save)

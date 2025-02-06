@@ -13,6 +13,8 @@ class Session(models.Model):
     creationDate = models.DateTimeField(default=now, editable=False)
     name = models.CharField(max_length=80)
     state = models.CharField(max_length=20, choices=State.choices, default=State.CREATED,)
+    approvedStudents = models.IntegerField(default=0)
+    disapprovedStudents = models.IntegerField(default=0)
 
     class Meta:
         unique_together = ('assessment', 'creationDate')

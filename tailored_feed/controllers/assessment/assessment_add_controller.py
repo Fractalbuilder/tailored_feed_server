@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from tailored_feed.exceptions.content_error import ContentError
 from tailored_feed.services.common.log_manager import LogManager
+from django.contrib.auth.decorators import login_required
 from tailored_feed.models.assessment.assessment import Assessment
 from tailored_feed.repositories.assessment.assessment_add_repository import AssessmentAddRepository
 from tailored_feed.services.assessment.assessment_add_service import AssessmentAddService
@@ -13,6 +14,7 @@ assessment_add_service = AssessmentAddService(AssessmentAddRepository())
 class AssessmentAddController:
 
     @staticmethod
+    @login_required
     def add(request):
         try:
             if request.method != 'POST':

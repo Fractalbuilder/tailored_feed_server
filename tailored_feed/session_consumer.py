@@ -57,11 +57,14 @@ class SessionConsumer(AsyncWebsocketConsumer):
         from tailored_feed.repositories.session.session_get_repository import SessionGetRepository
         from tailored_feed.repositories.user.user_get_repository import UserGetRepository
         from tailored_feed.repositories.question.question_get_repository import QuestionGetRepository
+        from tailored_feed.repositories.session_student.session_student_get_repository import SessionStudentGetRepository
         from tailored_feed.repositories.session_student.session_student_add_repository import SessionStudentAddRepository
         from tailored_feed.repositories.session_answer.session_answer_add_repository import SessionAnswerAddRepository
+        from tailored_feed.repositories.user.user_get_repository import UserGetRepository
         from tailored_feed.services.session.session_get_service import SessionGetService
         from tailored_feed.services.user.user_get_service import UserGetService
         from tailored_feed.services.question.question_get_service import QuestionGetService
+        from tailored_feed.services.session_student.session_student_get_service import SessionStudentGetService
         from tailored_feed.services.session_student.session_student_add_service import SessionStudentAddService
         from tailored_feed.services.session_answer.session_answer_add_service import SessionAnswerAddService
         from tailored_feed.services.session_answer.session_answer_handle_service import SessionAnswerHandleService
@@ -69,9 +72,19 @@ class SessionConsumer(AsyncWebsocketConsumer):
         session_get_service = SessionGetService(SessionGetRepository())
         user_get_service = UserGetService(UserGetRepository())
         question_get_service = QuestionGetService(QuestionGetRepository())
-        session_student_add_service = SessionStudentAddService(SessionStudentAddRepository())
+        session_student_get_service = SessionStudentGetService(
+            SessionStudentGetRepository(), session_get_service, UserGetRepository()
+        )
+
+        session_student_add_service = SessionStudentAddService(
+            SessionStudentAddRepository(), session_student_get_service, session_get_service
+        )
+
         session_answer_add_service = SessionAnswerAddService(SessionAnswerAddRepository(), question_get_service)
-        session_answer_handle_service = SessionAnswerHandleService(session_get_service, user_get_service, session_student_add_service, session_answer_add_service)
+        session_answer_handle_service = SessionAnswerHandleService(
+            session_get_service, user_get_service, session_student_add_service, 
+            session_answer_add_service, question_get_service
+        )
 
         try:
             data = json.loads(text_data)
@@ -89,11 +102,11 @@ class SessionConsumer(AsyncWebsocketConsumer):
                 
                 await self.handle_answer(
                     session_answer_handle_service, question_id, selected_options_indices, 
-                    session_id, user_id, 0, 0, question_index
+                    session_id, user_id, question_index
                 )
                 
                 await self.handle_response_signal(question_index)
-
+                
             else:
                 print(f"Received unknown message type: {message_type}")
 
@@ -155,6 +168,7 @@ class SessionConsumer(AsyncWebsocketConsumer):
 
 
     async def handle_question(self, assessment_id, index):
+        
         from tailored_feed.repositories.question.question_get_repository import QuestionGetRepository
         from tailored_feed.services.question.question_get_service import QuestionGetService
 
@@ -165,24 +179,27 @@ class SessionConsumer(AsyncWebsocketConsumer):
         if raw_question is None:
             raise Exception(f'No se encontró la pregunta con ID {assessment_id}.')
 
-        question_options = raw_question.options
+        question_options = raw_question.options['options']
         options = []
 
         for question_option in question_options:
             options.append(question_option['statement'])
         
         feedback = None
+        
+        if (index > 0):
+            raw_previous_question = await self.get_question_by_index_and_assessment_id(question_get_service, index - 1, assessment_id)
             
-        if raw_question.feedback_image:
-            feedback = {
-                "type": "image",
-                "data": raw_question.feedback_image.url
-            }
-        elif raw_question.feedback_text:
-            feedback = {
-                "type": "text",
-                "data": raw_question.feedback_text
-            }
+            if raw_previous_question.feedback_image:
+                feedback = {
+                    "type": "image",
+                    "data": raw_previous_question.feedback_image.url
+                }
+            elif raw_previous_question.feedback_text:
+                feedback = {
+                    "type": "text",
+                    "data": raw_previous_question.feedback_text
+                }
         
         question = {
             "id": raw_question.id,
@@ -271,12 +288,11 @@ class SessionConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def handle_answer(
         self, session_answer_handle_service, question_id, selected_options_indices, 
-        session_id, user_id, approved_questions, failed_questions, question_index
+        session_id, user_id, question_index
     ):  
         return session_answer_handle_service.handle(
             question_id=question_id, selected_options=selected_options_indices, 
-            session_id=session_id, student_id=user_id, approved_questions=approved_questions, 
-            failed_questions=failed_questions, current_question_index=question_index
+            session_id=session_id, student_id=user_id, current_question_index=question_index
         )
 
 

@@ -10,6 +10,19 @@ class SessionStudentGetRepository(SessionStudentGetRepositoryInterface):
     def __init__(self):
         self.exception_manager = ExceptionManager()
 
+    def by_session(self, session):
+        try:
+            """
+            Fetch SessionStudents by session.
+            """
+            return SessionStudent.objects.filter(session=session)
+        
+        except Exception as e:
+            argspec = inspect.getfullargspec(self.by_session)
+            parameters = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "by_session", parameters, str(e))
+
+    
     def by_session_n_user(self, session, user):
         try:
             """
@@ -21,8 +34,8 @@ class SessionStudentGetRepository(SessionStudentGetRepositoryInterface):
                 student=user,
                 defaults={
                     "creationDate": now(),
-                    "approvedQuestions": 0,
-                    "failedQuestions": 0,
+                    "correctAnswers": 0,
+                    "wrongAnswers": 0,
                     "currentQuestionIndex": -1
                 }
             )

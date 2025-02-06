@@ -25,7 +25,7 @@ def sse_sessions(request):
 
             yield f"data: {json.dumps(sessions_data)}\n\n"
             time.sleep(2)
-            print(counter)
+            #print(counter)
             counter += 1
 
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')

@@ -72,19 +72,41 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            var options = [
+                {% for option in question.options.options %}
+                    {
+                        statement: "{{ option.statement }}",
+                        correct: {{ option.correct|yesno:"true,false" }}
+                    },
+                {% endfor %}
+            ];
+
+            var atLeastOneCorrectAnswer = options.some(option => option.correct);
             let table = document.getElementById('options-table').getElementsByTagName('tbody')[0];
-            let loadImageFeedbackButton = document.getElementById('load-feedback-image');
-            let removeImageFeedbackButton = document.getElementById('remove-feedback-image');
-            let feedbackImageInput = document.getElementById('feedback-image');
             let feedbackImagePreview = document.getElementById('feedback-image-preview');
             let feedbackImageWarning = document.getElementById('feedback-image-preview-warning');
+            let feedbackImageInput = document.getElementById('feedback-image');
+            let loadImageFeedbackButton = document.getElementById('load-feedback-image');
+            let removeImageFeedbackButton = document.getElementById('remove-feedback-image');
+            let correctAnswerButton = document.getElementById('correct-answer-toggle');
+            let optionStatementTextarea = document.getElementById('option-statement');
+            let addOptionButton = document.getElementById('add-option');
             
+            let correctAnswer = false;
+        
             if (feedbackImagePreview.src) {
                 removeImageFeedbackButton.style.display = 'inline';
             }
     
             loadImageFeedbackButton.addEventListener('click', function () {
                 feedbackImageInput.click();
+            });
+
+            removeImageFeedbackButton.addEventListener('click', function () {
+                feedbackImageInput.value = '';
+                feedbackImagePreview.style.display = 'none';
+                feedbackImageWarning.style.display = 'block';
+                removeImageFeedbackButton.style.display = 'none';
             });
     
             feedbackImageInput.addEventListener('change', function (event) {
@@ -102,24 +124,18 @@
                 }
             });
     
-            removeImageFeedbackButton.addEventListener('click', function () {
-                feedbackImageInput.value = '';
-                feedbackImagePreview.style.display = 'none';
-                feedbackImageWarning.style.display = 'block';
-                removeImageFeedbackButton.style.display = 'none';
+            correctAnswerButton.addEventListener('click', function () {
+                correctAnswer = !correctAnswer;
+                correctAnswerButton.textContent = correctAnswer ? 'Sí' : 'No';
             });
     
-            let options = [
-                {% for option in question.options %}
-                    {
-                        statement: "{{ option.statement }}",
-                        correct: {{ option.correct|yesno:"true,false" }}
-                    },
-                {% endfor %}
-            ];
-    
-            function populateTable() {
+            optionStatementTextarea.addEventListener('input', function () {
+                addOptionButton.disabled = !optionStatementTextarea.value.trim();
+            });
+
+            function renderOptions() {
                 table.innerHTML = '';
+
                 options.forEach((option, index) => {
                     let newRow = table.insertRow();
                     newRow.insertCell(0).textContent = index + 1;
@@ -136,39 +152,11 @@
                     actionCell.appendChild(deleteButton);
                 });
     
-                if (options.length > 0) {
-                    document.getElementById('options-table-warning').style.display = "none";
-                    document.getElementById('options-table').style.display = "inline-table";
-                } else {
-                    document.getElementById('options-table-warning').style.display = "block";
-                    document.getElementById('options-table').style.display = "none";
-                }
+                document.getElementById('options-table-warning').style.display = options.length > 0 ? "none" : "block";
+                document.getElementById('options-table').style.display = options.length > 0 ? "inline-table" : "none";
             }
     
-            populateTable();
-    
-            let correctAnswerButton = document.getElementById('correct-answer-toggle');
-            let correctAnswer = false;
-            let addOptionButton = document.getElementById('add-option');
-            let optionStatementTextarea = document.getElementById('option-statement');
-    
-            correctAnswerButton.addEventListener('click', function () {
-                correctAnswer = !correctAnswer;
-                correctAnswerButton.textContent = correctAnswer ? 'Sí' : 'No';
-            });
-    
-            optionStatementTextarea.addEventListener('input', function () {
-                addOptionButton.disabled = !optionStatementTextarea.value.trim();
-            });
-    
-            function removeOption(index) {
-                options.splice(index, 1);
-                renderOptions();
-            }
-    
-            function renderOptions() {
-                populateTable();
-            }
+            renderOptions();
     
             addOptionButton.addEventListener('click', function () {
                 let optionStatement = optionStatementTextarea.value;
@@ -178,34 +166,57 @@
                         statement: optionStatement,
                         correct: correctAnswer
                     });
+
+                    if (correctAnswer) {
+                        atLeastOneCorrectAnswer = true;
+                    }
     
                     optionStatementTextarea.value = '';
                     correctAnswerButton.textContent = 'No';
                     correctAnswer = false;
                     addOptionButton.disabled = true;
+                    atLeastOneCorrectAnswer = options.some(option => option.correct);
                     renderOptions();
                 }
             });
-    
+
+            function removeOption(index) {
+                options.splice(index, 1);
+                atLeastOneCorrectAnswer = options.some(option => option.correct);
+                renderOptions();
+            }
+            
+            function getOptionsData() {
+                const correctAnswerIndices = options.reduce((accumulator, option, index) => {
+                    if (option.correct) {
+                    accumulator.push(index);
+                    }
+                    return accumulator;
+                }, []);
+
+                return { options, correctAnswerIndices };
+            }
+
             document.getElementById('save-question').addEventListener('click', function () {
                 let statement = document.getElementById('statement').value;
                 let feedbackText = document.getElementById('feedback-text').value;
-                let feedbackImage = document.getElementById('feedback-image');
-                let imageFile = feedbackImage.files[0];
+                let imageFile = feedbackImageInput.files[0];
 
-                if (statement.trim() && options.length > 0) {
+                if (statement.trim() && options.length > 1 && atLeastOneCorrectAnswer) {
                     let id = {{ question.id }};
                     let formData = new FormData();
+
+                    const optionsData = getOptionsData();
                     
                     formData.append('id', id);
                     formData.append('statement', statement);
                     formData.append('feedback_text', feedbackText);
-                    formData.append('options', JSON.stringify(options));
+                    formData.append('options', JSON.stringify(optionsData));
 
                     if (imageFile) {
                         formData.append('feedback_image', imageFile);
                     }
-
+                    
                     fetch("{% url 'question_update' %}", {
                         method: 'POST',
                         headers: {
@@ -222,7 +233,7 @@
                         window.location.href = "{% url 'question_update_view' id=question.id %}";
                     });
                 } else {
-                    alert('Debe llenar la pregunta y agregar al menos una opción.');
+                    alert('Debe llenar el enunciado, agregar al menos 2 opciones, y marcar por lo menos una opción como correcta.');
                 }
             });
         });

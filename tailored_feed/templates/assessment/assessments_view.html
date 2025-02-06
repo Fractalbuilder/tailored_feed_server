@@ -39,7 +39,10 @@
                         <td>{{ assessment.creationDate|date:"Y-m-d H:i:s" }}</td>
                         <td>
                             <a class="common-button" href="{% url 'questions_view' assessment_id=assessment.id %}">Preguntas</a>
-                            <a class="common-button" href="{% url 'sessions_view' assessment_id=assessment.id %}">Sesiones</a>
+                            
+                            {% if assessment.totalQuestions > 0 %}
+                                <a class="common-button" href="{% url 'sessions_view' assessment_id=assessment.id %}">Sesiones</a>
+                            {% endif %}
                         </td>
                         <td>
                             <button class="common-button" onclick="handleDeleteAssessment({{ assessment.id }})"

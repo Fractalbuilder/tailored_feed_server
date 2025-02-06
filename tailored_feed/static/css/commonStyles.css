@@ -74,6 +74,8 @@ textarea {
   display: inline-block;
   text-decoration: none;
   text-align: center;
+  font-size: 16px;
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
 .common-button:hover {

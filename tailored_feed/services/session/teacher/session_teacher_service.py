@@ -11,12 +11,16 @@ redis_client = redis.StrictRedis(host="127.0.0.1", port=6381, db=0)
 
 class SessionTeacherService(SessionTeacherServiceInterface):
     
-    def __init__(self, session_add_service, session_get_service, question_get_service):
+    def __init__(
+        self, session_add_service, session_get_service, 
+        question_get_service, session_student_add_service
+    ):
         self.exception_manager = ExceptionManager()
         self.channel_layer = get_channel_layer()
         self.session_add_service = session_add_service
         self.session_get_service = session_get_service
         self.question_get_service = question_get_service
+        self.session_student_add_service = session_student_add_service
 
 
     def handle_state(self, session_id, new_state):
@@ -29,8 +33,6 @@ class SessionTeacherService(SessionTeacherServiceInterface):
             session.state = new_state
             session = self.session_add_service.add_n_save(session=session)
             assistants_connected_key = f"session_{session.id}_assistants_connected"
-            print("Handle")
-            print(assistants_connected_key)
             assistants_in_process_key = f"session_{session.id}_assistants_in_process_key"
             assistants_finished_key = f"session_{session.id}_assistants_finished"
 
@@ -47,6 +49,7 @@ class SessionTeacherService(SessionTeacherServiceInterface):
             
             elif new_state == "finished":
                 self.end_session(session_id)
+                self.session_student_add_service.grade_session_students(session.id)
             
         except Exception as e:
             argspec = inspect.getfullargspec(self.handle_state)
@@ -62,24 +65,13 @@ class SessionTeacherService(SessionTeacherServiceInterface):
             if raw_question is None:
                 raise Exception(f'No se encontró la pregunta con ID {assessment_id}.')
 
-            question_options = raw_question.options
+            question_options = raw_question.options['options']
             options = []
 
             for question_option in question_options:
                 options.append(question_option['statement'])
 
             feedback = None
-            
-            if raw_question.feedback_image:
-                feedback = {
-                    "type": "image",
-                    "data": raw_question.feedback_image.url
-                }
-            elif raw_question.feedback_text:
-                feedback = {
-                    "type": "text",
-                    "data": raw_question.feedback_text
-                }
             
             question = {
                 "id": raw_question.id,
@@ -121,3 +113,13 @@ class SessionTeacherService(SessionTeacherServiceInterface):
             argspec = inspect.getfullargspec(self.end_session)
             parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
             self.exception_manager.throw_report(self, "end_session", parameters, str(e))
+
+
+    def compute_assessment_results(self, session_id):
+        try:
+            pass
+
+        except Exception as e:
+            argspec = inspect.getfullargspec(self.compute_assessment_results)
+            parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "compute_assessment_results", parameters, str(e))

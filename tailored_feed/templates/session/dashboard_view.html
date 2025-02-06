@@ -49,37 +49,63 @@
             </div>
 
             <div style="flex: 1;">
-                <h3>Gráfico de Progreso</h3>
-                <div style="display: flex; justify-content: center; align-items: center; max-width: 300px; margin: auto;">
-                    <canvas id="progressPieChart" style="width: 100%; height: 100%;"></canvas>
-                </div>
+                {% if session.state == "created" %}
+                {% elif session.state == 'finished' %}
+                    <h3>Gráfico de Resultados</h3>
+                    <div style="display: flex; justify-content: center; align-items: center; max-width: 300px; margin: auto;">
+                        <canvas id="progressPieChart" style="width: 100%; height: 100%;"></canvas>
+                    </div>
+                {% else %}
+                    <h3>Detalles Estudiantes</h3>
+                    <div style="display: flex; align-items: center;"> 
+                        <p class="common-text"><b>Conectados:</b> </p>
+                        <span id="assistants-connected-value" class="common-text" style="margin-left: 5px;">{{ context.students.total_count }}</span> 
+                    
+                    </div>
+                    <div style="display: flex; align-items: center;"> 
+                        <p class="common-text"><b>En desarrollo:</b> </p>
+                        <span id="assistants-in-process-value" class="common-text" style="margin-left: 5px;">{{ context.students.developing_count }}</span> 
+                    
+                    </div>
+                    <div style="display: flex; align-items: center;"> 
+                        <p class="common-text"><b>Finalizados:</b> </p>
+                        <span id="assistants-finished-value" class="common-text" style="margin-left: 5px;">{{ context.students.finished_count }}</span> 
+                    </div>
+                {% endif %}
             </div>
         </div>
         <br>
         <hr>
         <div style="display: flex;">
             <div style="flex: 1;">
-                <h3>Detalles Estudiantes</h3>
-                <div style="display: flex; align-items: center;"> 
-                    <p class="common-text"><b>Conectados:</b> </p>
-                    <span id="assistants-connected-value" class="common-text" style="margin-left: 5px;">{{ context.students.total_count }}</span> 
-                
-                </div>
-                <div style="display: flex; align-items: center;"> 
-                    <p class="common-text"><b>En desarrollo:</b> </p>
-                    <span id="assistants-in-process-value" class="common-text" style="margin-left: 5px;">{{ context.students.developing_count }}</span> 
-                
-                </div>
-                <div style="display: flex; align-items: center;"> 
-                    <p class="common-text"><b>Finalizados:</b> </p>
-                    <span id="assistants-finished-value" class="common-text" style="margin-left: 5px;">{{ context.students.finished_count }}</span> 
-                
-                </div>
-            </div>
-
-            <div style="flex: 1;">
-                <h3>Estudiantes con Menor Rendimiento</h3>
-                <p class="common-text">No hay datos aún</p>
+                {% if session.state == "finished" %}
+                    <h3>Detalles de Resultados</h3>
+                    <table border="1">
+                        <thead>
+                            <tr>
+                                <th>Nombre Estudiante</th>
+                                <th>Aciertos</th>
+                                <th>Nota (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for session_student in context.session_students %}
+                            <tr>
+                                <td>{{ session_student.student__username }}</td>
+                                <td>{{ session_student.correctAnswers }}</td>
+                                <td>{{ session_student.grade|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3">No students found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% elif session.state == 'in_process' %}
+                    <h3>Estudiantes con Menor Rendimiento</h3>
+                    <p class="common-text">No hay datos aún</p>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -114,50 +140,49 @@
                 }
             };
 
+            const stateAliases = {
+                'created': 'Creada',
+                'waiting': 'A la espera',
+                'in_process': 'En desarrollo',
+                'finished': 'Finalizada'
+            };
+            
+            const sessionStateElement = document.getElementById('session-state');
+            const sessionState = sessionStateElement.getAttribute('data-state');
+            sessionStateElement.textContent = stateAliases[sessionState] || sessionState;
+
             dashboardSocket.onclose = function() {
                 console.error('Dashboard WebSocket closed unexpectedly');
             };
         });
 
         const ctx = document.getElementById('progressPieChart').getContext('2d');
-            const progressPieChart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: ['Aprobado', 'Reprobado', 'En Desarrollo'],
-                    datasets: [{
-                        data: [
-                            {{ context.students.passed_count }},
-                            {{ context.students.failed_count }},
-                            {{ context.students.developing_count }}
-                        ],
-                        backgroundColor: ['#4caf50', '#f44336', '#ff9800']
-                    }]
-                },
-                options: {
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: 'white'
-                            },
-                            position: 'bottom'
+        const progressPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Aprobado', 'Reprobado'],
+                datasets: [{
+                    data: [
+                        {{ session.approvedStudents }},
+                        {{ session.disapprovedStudents }}
+                    ],
+                    backgroundColor: ['#4caf50', '#f44336', '#ff9800']
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: 'white'
                         },
-                        tooltip: {
-                            bodyColor: 'white',
-                            titleColor: 'white',
-                        }
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        bodyColor: 'white',
+                        titleColor: 'white',
                     }
                 }
-            });
-
-        const stateAliases = {
-            'created': 'Creada',
-            'waiting': 'A la espera',
-            'in_process': 'En desarrollo',
-            'finished': 'Finalizada'
-        };
-        
-        const sessionStateElement = document.getElementById('session-state');
-        const sessionState = sessionStateElement.getAttribute('data-state');
-        sessionStateElement.textContent = stateAliases[sessionState] || sessionState;    
+            }
+        });
     </script>
 {% endblock %}

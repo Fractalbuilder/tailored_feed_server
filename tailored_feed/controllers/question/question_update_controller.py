@@ -4,24 +4,29 @@ from django.shortcuts import redirect, render
 from django.contrib import messages
 from tailored_feed.exceptions.content_error import ContentError
 from tailored_feed.services.common.log_manager import LogManager
+from django.contrib.auth.decorators import login_required
 from tailored_feed.models.assessment.assessment_question import AssessmentQuestion
 from tailored_feed.repositories.question.question_get_repository import QuestionGetRepository
+from tailored_feed.repositories.assessment.assessment_get_repository import AssessmentGetRepository
 from tailored_feed.repositories.assessment.assessment_add_repository import AssessmentAddRepository
 from tailored_feed.repositories.question.question_add_repository import QuestionAddRepository
+from tailored_feed.services.assessment.assessment_get_service import AssessmentGetService
 from tailored_feed.services.assessment.assessment_add_service import AssessmentAddService
 from tailored_feed.services.question.question_get_service import QuestionGetService
 from tailored_feed.services.question.questions_arrange_service import QuestionsArrangeService
 from tailored_feed.services.question.question_add_service import QuestionAddService
 
 log_manager = LogManager()
+assessment_get_service = AssessmentGetService(AssessmentGetRepository())
 assessment_add_service = AssessmentAddService(AssessmentAddRepository())
 question_get_service = QuestionGetService(QuestionGetRepository())
 questions_arrange_service = QuestionsArrangeService(QuestionGetRepository())
-question_add_service = QuestionAddService(QuestionAddRepository(), assessment_add_service, questions_arrange_service)
+question_add_service = QuestionAddService(QuestionAddRepository(), questions_arrange_service, assessment_add_service)
 
 class QuestionUpdateController:
 
     @staticmethod
+    @login_required
     def view(request, id: int):
         try:
             question = question_get_service.by_id(id)
@@ -41,6 +46,7 @@ class QuestionUpdateController:
 
 
     @staticmethod
+    @login_required
     def update(request):
         try:
             if request.method != 'POST':
@@ -57,14 +63,7 @@ class QuestionUpdateController:
             question.options = options
             question.feedback_text = feedback_text
             question.feedback_image = None
-
-            if 'feedback_image' in request.FILES:
-                feedback_image = request.FILES['feedback_image']
-                ext = feedback_image.name.split('.')[-1]
-                image_path = f'{question.assessment.id}/{id}.{ext}'
-                question.feedback_image.save(image_path, feedback_image)
-
-            question_add_service.add_n_save(question)
+            question_add_service.add_n_save(question, request.FILES)
             messages.success(request, 'La pregunta se actualizó exitosamente')
 
         except ContentError as e:
