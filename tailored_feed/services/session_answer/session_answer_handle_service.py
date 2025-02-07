@@ -21,7 +21,7 @@ class SessionAnswerHandleService(SessionAnswerHandleServiceInterface):
 
     def handle(
         self, question_id: int, selected_options, session_id: int, 
-        student_id: int, current_question_index: int
+        student_id: int, current_question_index: int, userContext: dict
     ):
         try:
             is_correct = False
@@ -42,7 +42,8 @@ class SessionAnswerHandleService(SessionAnswerHandleServiceInterface):
             session_answer = self.session_answer_add_service.add(
                 question_id=question_id, 
                 session_student=session_student, 
-                selected_options=selected_options
+                selected_options=selected_options,
+                userContext=userContext
             )
 
             return session_answer

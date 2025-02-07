@@ -11,14 +11,15 @@ class SessionAnswerAddService(SessionAnswerAddServiceInterface):
         self.question_get_service = question_get_service 
 
 
-    def add(self, question_id: int, session_student, selected_options):
+    def add(self, question_id: int, session_student, selected_options, userContext):
         try:
             question = self.question_get_service.by_id(question_id)
 
             session_answer = SessionAnswer(
                 assessmentQuestion=question,
                 sessionStudent=session_student,
-                selectedOptions=selected_options
+                selectedOptions=selected_options,
+                userContext=userContext
             )
             
             return self.add_repository.add(session_answer)

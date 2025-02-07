@@ -97,12 +97,14 @@ class SessionConsumer(AsyncWebsocketConsumer):
                 question_id = payload.get('questionId')
                 question_index = payload.get('questionIndex')
                 selected_options_indices = payload.get('selectedOptionsIndices')
+                userContext = payload.get('userContext')
                 total_questions = payload.get('totalQuestions')
                 print(f"Session ID: {session_id}. User ID: {user_id}. Question ID: {question_id}. Question index: {question_index}. Selected options: {selected_options_indices}. Total questions: {total_questions}.")
-                
+                print(f"User context: {userContext}")
+
                 await self.handle_answer(
                     session_answer_handle_service, question_id, selected_options_indices, 
-                    session_id, user_id, question_index
+                    session_id, user_id, question_index, userContext
                 )
                 
                 await self.handle_response_signal(question_index)
@@ -288,11 +290,12 @@ class SessionConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def handle_answer(
         self, session_answer_handle_service, question_id, selected_options_indices, 
-        session_id, user_id, question_index
+        session_id, user_id, question_index, userContext
     ):  
         return session_answer_handle_service.handle(
             question_id=question_id, selected_options=selected_options_indices, 
-            session_id=session_id, student_id=user_id, current_question_index=question_index
+            session_id=session_id, student_id=user_id, current_question_index=question_index,
+            userContext=userContext
         )
 
 

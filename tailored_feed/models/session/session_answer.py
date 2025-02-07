@@ -9,6 +9,7 @@ class SessionAnswer(models.Model):
     assessmentQuestion = models.ForeignKey(AssessmentQuestion, on_delete=models.CASCADE, related_name="session_answer_question")
     sessionStudent = models.ForeignKey(SessionStudent, on_delete=models.CASCADE, related_name="session_answer_student")
     selectedOptions = JSONField(default=list)
+    userContext = JSONField(default=dict)
     creationDate = models.DateTimeField(default=now, editable=False)
 
     class Meta:
