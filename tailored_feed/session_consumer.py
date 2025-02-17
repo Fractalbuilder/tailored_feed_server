@@ -143,7 +143,9 @@ class SessionConsumer(AsyncWebsocketConsumer):
             next_question_index = current_question_index + 1
             
             if next_question_index < self.total_questions:
-                await self.handle_question(session.assessment_id, next_question_index)
+                await self.handle_question(
+                    session.assessment_id, next_question_index, session.feedbackEnabled
+                )
                 
             else:
                 event = {
@@ -158,6 +160,7 @@ class SessionConsumer(AsyncWebsocketConsumer):
                 redis_client.incr(assistants_finished_key)
                 assistants_in_process = int(redis_client.get(assistants_in_process_key))
                 assistants_finished = int(redis_client.get(assistants_finished_key))
+                
                 await self.dashboard_notify_completeness(assistants_in_process, assistants_finished)
 
         else:
@@ -169,7 +172,7 @@ class SessionConsumer(AsyncWebsocketConsumer):
             await self.send_notification_signal(event)
 
 
-    async def handle_question(self, assessment_id, index):
+    async def handle_question(self, assessment_id, index, feedback_enabled):
         
         from tailored_feed.repositories.question.question_get_repository import QuestionGetRepository
         from tailored_feed.services.question.question_get_service import QuestionGetService
@@ -189,7 +192,7 @@ class SessionConsumer(AsyncWebsocketConsumer):
         
         feedback = None
         
-        if (index > 0):
+        if (feedback_enabled and index > 0):
             raw_previous_question = await self.get_question_by_index_and_assessment_id(question_get_service, index - 1, assessment_id)
             
             if raw_previous_question.feedback_image:

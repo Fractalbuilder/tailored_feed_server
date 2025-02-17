@@ -11,18 +11,25 @@
             <a class="common-button" href="{% url 'assessments_view' %}">Volver</a>
         </div>
         
-        <p class="common-text">Nueva sesión:</p>
-        <form id="addSessionForm" action="{% url 'session_add' %}" method="POST">
+        <form id="addSessionForm" action="{% url 'session_add' %}" method="POST" style="width: 50%;">
             {% csrf_token %}
-            <input 
-                id="addSessionFormNameInput" 
-                style="margin-right: 4px;" 
-                type="text" 
-                name="name" 
-                placeholder="Nombre" 
-                value="{{ context.assessment.name }} - {% now 'Y-m-d H:i:s' %}" 
-                autofocus
-            >
+        
+            <div style="display: flex; align-items: center;">
+                <p class="common-text" style="margin-right: 8px;">Nombre nueva sesión</p>
+                <input 
+                    id="addSessionFormNameInput" 
+                    type="text" 
+                    name="name" 
+                    placeholder="Nombre" 
+                    value="{{ context.assessment.name }} - {% now 'Y-m-d H:i:s' %}" 
+                    style="flex: 1;"
+                    autofocus
+                >
+                <label class="common-text" style="margin: 0 5px 0 20px;">¿Habilitar retroalimentación?</label>
+                <button class="common-button" type="button" id="feedback-enabled-toggle">Si</button>
+            </div>
+            
+            <input type="hidden" name="feedback_enabled" id="feedback-enabled-input" value="true">
             <input type="hidden" name="assessment_id" value="{{ context.assessment.id }}">
             <button class="common-button" type="submit">Crear</button>
             <span id="addSessionFormNameError" class="common-text" style="display:none;"></span>
@@ -63,6 +70,15 @@
             const input = document.getElementById("addSessionFormNameInput");
             input.focus();
             input.setSelectionRange(input.value.length, input.value.length);
+            let feedbackEnabledButton = document.getElementById('feedback-enabled-toggle');
+            let feedbackEnabledInput = document.getElementById("feedback-enabled-input");
+            let feedbackEnabled = true;
+
+            feedbackEnabledButton.addEventListener('click', function () {
+                feedbackEnabled = !feedbackEnabled;
+                feedbackEnabledButton.textContent = feedbackEnabled ? 'Si' : 'No';
+                feedbackEnabledInput.value = feedbackEnabled ? 'true' : 'false';
+            });
         });
 
         function handleDeleteAssessment(assessmentId) {

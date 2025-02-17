@@ -30,8 +30,6 @@ tbody tr:nth-child(even) {
 
 tbody td {
     padding: 10px;
-    border-bottom: 1px solid #ddd;
-    border-right: 1px solid #ddd;
 }
 
 tbody td:last-child {

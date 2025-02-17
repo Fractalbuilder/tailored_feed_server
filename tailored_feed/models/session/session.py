@@ -15,6 +15,7 @@ class Session(models.Model):
     state = models.CharField(max_length=20, choices=State.choices, default=State.CREATED,)
     approvedStudents = models.IntegerField(default=0)
     disapprovedStudents = models.IntegerField(default=0)
+    feedbackEnabled = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ('assessment', 'creationDate')

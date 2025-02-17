@@ -36,7 +36,7 @@ class DashboardViewController:
             assistants_connected = int(redis_client.get(assistants_connected_key) or 0)
             assistants_in_process = int(redis_client.get(assistants_in_process_key) or 0)
             assistants_finished = int(redis_client.get(assistants_finished_key) or 0)
-
+            
             students_developing_count = assistants_in_process
             students_finished_count = assistants_finished
 

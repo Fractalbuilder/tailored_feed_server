@@ -131,6 +131,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+#STATIC_ROOT = '/media/tailored_feed/static' #Production
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/') # Development
+#MEDIA_ROOT = '/media/tailored_feed/media' # Production
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -168,9 +173,6 @@ REST_FRAMEWORK = {
 CORS_ALLOW_ALL_ORIGINS = True
 LOGIN_URL = '/login/'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -201,8 +203,10 @@ CHANNEL_LAYERS = {
     },
 }
 
-BACKEND_IP = '192.168.1.120'
+BACKEND_IP = '192.168.1.120' # Development
+#BACKEND_IP = '' # Production
 CHANNELS_PORT = '8083'
+#CHANNELS_PORT = '80' # Production
 RRS_SIZE = 4
 RRS_SAMPLE = 3
 ASSESSMENT_APPROVAL_PERCENTAGE = 60

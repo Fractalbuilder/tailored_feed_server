@@ -6,9 +6,15 @@ class User(AbstractUser):
         ADMIN = 'admin', 'Admin'
         TEACHER = 'teacher', 'Teacher'
         STUDENT = 'student', 'Student'
-
+    
+    externalId = models.IntegerField(default=0, unique=True)
     role = models.CharField(
         max_length=10,
         choices=Role.choices,
         default=Role.STUDENT,
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['externalId', 'role'], name='unique_external_id_role')
+        ]

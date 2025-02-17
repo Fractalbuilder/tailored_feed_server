@@ -18,7 +18,7 @@ from tailored_feed.controllers.session.teacher.dashboard_view_controller import 
 from tailored_feed.controllers.session.teacher.session_teacher_controller import SessionTeacherController
 
 urlpatterns = [
-    path("", views.index, name="index"),
+    path("", AssessmentsViewController.view, name="index"),
     path('error-page/', ErrorPageViewController.view, name='error_page'),
     path('login/', AuthenticationViewController.login_view, name='login'),
     path('logout/', AuthenticationViewController.logout, name='logout'),

@@ -34,7 +34,7 @@ class SessionStudentGetService(SessionStudentGetServiceInterface):
                 SessionStudent.objects
                 .filter(session_id=session_id)
                 .select_related("student")  # Join with User table
-                .values("id", "student__id", "student__username", "creationDate", 
+                .values("id", "student__id", "student__username", "student__externalId", "creationDate", 
                         "correctAnswers", "wrongAnswers", "currentQuestionIndex", "grade")
             )
             return list(session_students)

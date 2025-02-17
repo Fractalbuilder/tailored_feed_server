@@ -1,3 +1,5 @@
+import inspect
+from tailored_feed.services.common.log_manager import LogManager
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
@@ -8,6 +10,8 @@ from rest_framework_simplejwt.exceptions import TokenError
 from django.contrib.auth import authenticate
 from django_redis import get_redis_connection
 from tailored_feed.serializers.user import UserSerializer
+
+log_manager = LogManager()
 
 class LoginView(APIView):
     def post(self, request):
@@ -93,7 +97,7 @@ class UserView(APIView):
     def post(self, request):
         try:
             serializer = UserSerializer(data=request.data)
-
+            
             if serializer.is_valid():
                 user = serializer.save()
                 refresh_token = RefreshToken.for_user(user)

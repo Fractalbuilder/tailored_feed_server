@@ -26,8 +26,10 @@ class SessionAddController:
             data = request.POST
             name = data.get('name')
             assessment_id = data.get('assessment_id')
+            feedback_enabled_string = data.get('feedback_enabled')
+            feedback_enabled = feedback_enabled_string == 'true'
             assessment = assessment_get_service.by_id(assessment_id)
-            session = Session(name=name, assessment=assessment)
+            session = Session(name=name, assessment=assessment, feedbackEnabled=feedback_enabled)
             session_add_service.add_n_save(session=session)
             messages.success(request, 'La sesión se creó exitosamente')
 
