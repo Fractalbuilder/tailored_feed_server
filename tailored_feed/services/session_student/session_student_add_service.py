@@ -39,8 +39,9 @@ class SessionStudentAddService(SessionStudentAddServiceInterface):
             return None #Or raise a custom exception
 
         except Exception as e:
-            print(f"Unexpected error creating/updating SessionStudent: {e}")
-            return None #Or raise a custom exception
+            argspec = inspect.getfullargspec(self.create_or_update_session_student)
+            parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "create_or_update_session_student", parameters, str(e))
 
 
     def grade_session_students(self, session_id):
@@ -57,9 +58,10 @@ class SessionStudentAddService(SessionStudentAddServiceInterface):
             disapproved_students = 0
             
             for session_student in session_students:
-                grade = (session_student.correctAnswers / total_questions) * 100
-                session_student.grade = grade
-                session_student.save()
+                grade = session_student.grade
+
+                if grade is None:
+                    grade = self.generate_grade(session_student, total_questions)
 
                 if grade >= 60:
                     approved_students += 1
@@ -74,3 +76,22 @@ class SessionStudentAddService(SessionStudentAddServiceInterface):
             argspec = inspect.getfullargspec(self.grade_session_students)
             parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
             self.exception_manager.throw_report(self, "grade_session_students", parameters, str(e))
+
+
+    def grade_student(self, session_id, student_id, total_questions):
+        try:
+            session_student = self.get_service.by_session_n_user(session_id, student_id)
+            grade = self.generate_grade(session_student, total_questions)
+
+        except Exception as e:
+            argspec = inspect.getfullargspec(self.grade_student)
+            parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "grade_student", parameters, str(e))
+
+
+    def generate_grade(self, session_student, total_questions):
+        grade = (session_student.correctAnswers / total_questions) * 100
+        session_student.grade = grade
+        session_student.save()
+
+        return grade

@@ -8,6 +8,7 @@ class Assessment(models.Model):
     creationDate = models.DateTimeField(default=now, editable=False)
     editable = models.BooleanField(default=True)
     totalQuestions = models.IntegerField(blank=True, null=True, default=0)
+    duration = models.PositiveIntegerField(default=0)
 
     def to_dict(self):
 
@@ -20,5 +21,6 @@ class Assessment(models.Model):
                 'email': self.owner.email
             },
             'creation_date': self.creationDate.isoformat(),
-            'editable': self.editable
+            'editable': self.editable,
+            'duration': self.duration
         }

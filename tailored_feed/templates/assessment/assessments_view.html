@@ -8,10 +8,24 @@
     <div id="main-container">
         <h1>Evaluaciones</h1>
 
-        <p class="common-text">Nueva evaluación:</p>
         <form id="addAssessmentForm" action="{% url 'assessment_add' %}" method="POST">
             {% csrf_token %}
-            <input id="addAssessmentFormNameInput" style="margin-right: 4px;" type="text" name="name" placeholder="Nombre" autofocus>
+            <input id="addAssessmentFormNameInput" 
+               type="text" 
+               name="name" 
+               placeholder="Nombre" 
+               style="flex: 1; min-width: 150px;"
+               autofocus>
+
+        <label class="common-text" for="addAssessmentFormDurationInput" style="margin: 0 5px 0 15px;">Duración (min):</label>
+        <input type="number" 
+               name="duration" 
+               placeholder="60" 
+               min="1" 
+               value="60" 
+               style="width: 50px; text-align: center;" 
+               required>
+                
             <button class="common-button" type="submit">Crear</button>
             <span id="addAssessmentFormNameError" class="common-text" style="display:none;"></span>
         </form>

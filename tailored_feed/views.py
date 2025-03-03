@@ -18,7 +18,7 @@ def sse_sessions(request):
         while True:
             sessions = session_get_service.all_active()
             sessions_data = [
-                {"id": session.id, "name": session.name, "totalQuestions": session.assessment.totalQuestions}
+                {"id": session.id, "name": session.name, "totalQuestions": session.assessment.totalQuestions, "duration": session.assessment.duration}
                 for session in sessions
             ]
 

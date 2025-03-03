@@ -1,4 +1,8 @@
 import inspect, redis
+
+from datetime import timedelta, datetime
+from django.utils.timezone import now
+
 from django.conf import settings
 from django.shortcuts import render, redirect
 from tailored_feed.services.common.log_manager import LogManager
@@ -54,7 +58,7 @@ class DashboardViewController:
                 'assessment': {
                     'id': assessment_id,
                     'name': assessment_name,
-                    'total_questions': total_questions
+                    'total_questions': total_questions,
                 },
                 'students': {
                     'total_count': assistants_connected,
@@ -68,6 +72,11 @@ class DashboardViewController:
                 session_students = session_student_get_service.by_session_with_students(session.id)
                 context['session_students'] = session_students
 
+            if session.startDate:
+                end_time = session.startDate + timedelta(minutes=session.assessment.duration)
+                remaining_time = (end_time - now()).total_seconds() / 60
+                print("Remaining time:" + str(remaining_time))
+            
             return render(
                 request, 
                 'session/dashboard_view.html', 

@@ -21,7 +21,8 @@ class AssessmentAddController:
                 raise ContentError('La petición no usa el método POST')
             
             name = request.POST.get('name')
-            assessment = Assessment(name=name, owner=request.user)
+            duration = request.POST.get('duration')
+            assessment = Assessment(name=name, duration=duration, owner=request.user)
             assessment_add_service.add_n_save(assessment)
             messages.success(request, 'La evaluación se creó exitosamente')
 

@@ -10,3 +10,7 @@ class SessionStudentAddServiceInterface(ABC):
     @abstractmethod
     def grade_session_students(self, session_id):
         pass
+
+    @abstractmethod
+    def grade_student(self, session_id, student_id):
+        pass

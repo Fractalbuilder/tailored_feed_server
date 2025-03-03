@@ -18,7 +18,6 @@ class SessionStudentGetService(SessionStudentGetServiceInterface):
             session = self.session_get_service.by_id(session_id)
             return self.get_repository.by_session(session)
 
-
         except Exception as e:
             argspec = inspect.getfullargspec(self.by_session)
             parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
@@ -36,6 +35,7 @@ class SessionStudentGetService(SessionStudentGetServiceInterface):
                 .select_related("student")  # Join with User table
                 .values("id", "student__id", "student__username", "student__externalId", "creationDate", 
                         "correctAnswers", "wrongAnswers", "currentQuestionIndex", "grade")
+                .order_by("student__externalId")
             )
             return list(session_students)
 
@@ -52,8 +52,17 @@ class SessionStudentGetService(SessionStudentGetServiceInterface):
             user = self.user_get_repository.by_id(student_id)
             return self.get_repository.by_session_n_user(session, user)
 
-
         except Exception as e:
             argspec = inspect.getfullargspec(self.by_session_n_user)
             parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
             self.exception_manager.throw_report(self, "by_session_n_user", parameters, str(e))
+
+    
+    def get_avg_question_index(self, session_id, last_question_index):
+        try:
+            return self.get_repository.get_avg_question_index(session_id, last_question_index)
+
+        except Exception as e:
+            argspec = inspect.getfullargspec(self.get_avg_question_index)
+            parameters = {name: value for name, value in locals().items() if name in argspec.args and name != 'self'}
+            self.exception_manager.throw_report(self, "get_avg_question_index", parameters, str(e))

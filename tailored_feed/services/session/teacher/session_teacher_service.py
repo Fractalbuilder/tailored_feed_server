@@ -1,4 +1,6 @@
 import inspect, redis
+from datetime import datetime
+from django.utils import timezone
 from tailored_feed.services.common.exception_manager import ExceptionManager
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -33,7 +35,7 @@ class SessionTeacherService(SessionTeacherServiceInterface):
             session.state = new_state
             session = self.session_add_service.add_n_save(session=session)
             assistants_connected_key = f"session_{session.id}_assistants_connected"
-            assistants_in_process_key = f"session_{session.id}_assistants_in_process_key"
+            assistants_in_process_key = f"session_{session.id}_assistants_in_process"
             assistants_finished_key = f"session_{session.id}_assistants_finished"
 
             if new_state == "waiting":
@@ -43,8 +45,10 @@ class SessionTeacherService(SessionTeacherServiceInterface):
             
             elif new_state == "in_process":
                 assistants_connected = int(redis_client.get(assistants_connected_key))
-                assistants_in_process_key = f"session_{session.id}_assistants_in_process"
                 redis_client.set(assistants_in_process_key, assistants_connected)
+                session.enrolledStudents = assistants_connected
+                session.startDate = timezone.now()
+                session = self.session_add_service.add_n_save(session=session)
                 self.start_session(session_id, session.assessment.id)
             
             elif new_state == "finished":
