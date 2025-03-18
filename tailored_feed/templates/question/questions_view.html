@@ -40,7 +40,7 @@
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ question.statement }}</td>
-                            <td>{{ question.options|length }}</td>
+                            <td>{{ question.options.options|length }}</td>
                             <td>
                                 {% if question.feedback_text %}
                                     <img src="{% static 'images/feedback/text_icon_active.svg' %}" alt="Texto_si" width="30px" height="30px">

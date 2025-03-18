@@ -50,7 +50,9 @@ class SessionConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         session_student = await self.get_session_student(session_student_get_service)
+        self.session_student_id = session_student.id
         question_index = session_student.currentQuestionIndex
+
         await self.handle_response_signal(
             question_index, session_student_get_service, session_student_add_service
         )
@@ -344,16 +346,12 @@ class SessionConsumer(AsyncWebsocketConsumer):
         
         if (feedback_enabled and index > 0):
             if(approvalPrediction == "not_predicted" or approvalPrediction == "disapproved"):
-                print("Hint F A")
                 feedback = await self.get_hint_feedback(question_get_service, index, assessment_id)
-                print("Hint F B")
 
                 if feedback:
                     return feedback
             
-            print("Session F A")
             feedback = self.get_session_feedback(session, index)
-            print("Session F B")
 
         return feedback
 
@@ -476,10 +474,10 @@ class SessionConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def approval_sample_generate_iteration_model(
-        self, approval_sample_add_service, 
-        iteration, assessment_id, question_index_assessed
+        self, approval_sample_add_service, iteration, 
+        assessment_id, question_index_assessed
     ):
         return approval_sample_add_service.generate_iteration_model(
-            iteration, assessment_id, self.session_id, 
+            iteration, assessment_id, self.session_student_id, self.session_id, 
             question_index_assessed, self.total_questions - 1
         )

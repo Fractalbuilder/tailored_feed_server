@@ -17,12 +17,12 @@ class ApprovalSampleAddService(ApprovalSampleAddServiceInterface):
 
 
     def generate_iteration_model(
-        self, iteration: int, assessment_id: int, session_id: int, 
+        self, iteration: int, assessment_id: int, session_student_id: int, session_id: int, 
         question_index_assessed: int, assessment_last_question_index: int
     ):
         try:
             self.handle_approval_samples_addition(
-                iteration, assessment_id, 
+                iteration, assessment_id, session_student_id, 
                 question_index_assessed, assessment_last_question_index
             )
             
@@ -65,9 +65,8 @@ class ApprovalSampleAddService(ApprovalSampleAddServiceInterface):
             X_scaled = scaler.transform(df)
             prediction = model.predict(X_scaled)[0]
             is_approved = True if prediction == 1 else False
-            print("YYYYYY")
-            self.add_approval_sample(normalized_student_answer, assessment_id, iteration, True, is_approved)
-            print("UUUUUU")
+            
+            self.add_approval_sample(normalized_student_answer, assessment_id, session_student_id, iteration, True, is_approved)
             
             return "Approved" if prediction == 1 else "Disapproved"
         
@@ -78,7 +77,7 @@ class ApprovalSampleAddService(ApprovalSampleAddServiceInterface):
 
 
     def handle_approval_samples_addition(
-        self, iteration: int, assessment_id: int, 
+        self, iteration: int, assessment_id: int, session_student_id: int, 
         question_index_assessed: int, assessment_last_question_index: int
     ):
         session_answers = self.get_repository.finished_session_students_answers(
@@ -114,7 +113,7 @@ class ApprovalSampleAddService(ApprovalSampleAddServiceInterface):
             normalized_student_answer = self.normalize_student_answers(student_answers)
 
             self.add_approval_sample(
-                normalized_student_answer, assessment_id, iteration, False, is_approved
+                normalized_student_answer, assessment_id, session_student_id, iteration, False, is_approved
             )
 
 
@@ -123,14 +122,11 @@ class ApprovalSampleAddService(ApprovalSampleAddServiceInterface):
             df = self.get_training_data(assessment_id, iteration)
             X = df.drop(columns=['isApproved'])
             y = df['isApproved']
-
-            #X['correctAnswers'] *= 10
-            #X['correctAnswers'] *= 30
             X['correctAnswers'] *= 60
 
             scaler = StandardScaler()
             X_scaled = scaler.fit_transform(X)
-            X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+            X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42, stratify=y)
             
             model = LogisticRegression()
             model.fit(X_train, y_train)
@@ -152,9 +148,10 @@ class ApprovalSampleAddService(ApprovalSampleAddServiceInterface):
             self.exception_manager.throw_report(self, "train_model", parameters, str(e))
 
 
-    def add_approval_sample(self, normalized_student_answer, assessment_id, iteration, is_predicted, is_approved):        
+    def add_approval_sample(self, normalized_student_answer, assessment_id, session_student_id, iteration, is_predicted, is_approved):        
         approval_sample = ApprovalSample(
             assessment_id=assessment_id,
+            session_student_id=session_student_id,
             iteration=iteration,
             isPredicted=is_predicted,
             isApproved=is_approved,

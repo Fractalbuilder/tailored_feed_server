@@ -5,7 +5,7 @@ class ApprovalSampleAddServiceInterface(ABC):
 
     @abstractmethod
     def generate_iteration_model(
-        self, get_repository, iteration: int, assessment_id: int, 
+        self, iteration: int, assessment_id: int, session_student_id: int, session_id: int, 
         question_index_assessed: int, assessment_last_question_index: int
     ):
         pass
