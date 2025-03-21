@@ -12,7 +12,7 @@ class ApprovalSampleAddServiceInterface(ABC):
 
     @abstractmethod
     def predict_student_approval(
-        self, get_repository, add_repository, assessment_id, session_id, session_student_id,
-        question_index_assessed, iteration, assessment_last_question_index
+        self, assessment_id, session_id, session_student_id,
+        iteration_index_assessed, iteration, assessment_last_question_index
     ):
         pass

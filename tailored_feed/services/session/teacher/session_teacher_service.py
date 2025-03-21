@@ -17,8 +17,8 @@ class SessionTeacherService(SessionTeacherServiceInterface):
         self, session_add_service, session_get_service, 
         question_get_service, session_student_add_service
     ):
-        self.exception_manager = ExceptionManager()
         self.channel_layer = get_channel_layer()
+        self.exception_manager = ExceptionManager()
         self.session_add_service = session_add_service
         self.session_get_service = session_get_service
         self.question_get_service = question_get_service

@@ -40,7 +40,7 @@ class ApprovalSampleAddService(ApprovalSampleAddServiceInterface):
 
     def predict_student_approval(
         self, assessment_id, session_id, session_student_id,
-        question_index_assessed, iteration, assessment_last_question_index
+        iteration_index_assessed, iteration, assessment_last_question_index
     ):
         try:
             model_dir = "ai_models"
@@ -54,12 +54,13 @@ class ApprovalSampleAddService(ApprovalSampleAddServiceInterface):
             scaler = joblib.load(scaler_filename)
             
             normalized_student_answer = self.get_normalized_student_answers(
-                session_student_id, question_index_assessed
+                session_student_id, iteration_index_assessed
             )
 
-            # TMP Remove elapse_time
+            # TMP Remove elapse_time and bandwith
             fix_normalized_student_answers = normalized_student_answer.copy()
             del fix_normalized_student_answers["elapsed_time"]
+            del fix_normalized_student_answers["bandwidth"]
 
             df = pd.DataFrame([fix_normalized_student_answers])
             X_scaled = scaler.transform(df)
@@ -68,7 +69,7 @@ class ApprovalSampleAddService(ApprovalSampleAddServiceInterface):
             
             self.add_approval_sample(normalized_student_answer, assessment_id, session_student_id, iteration, True, is_approved)
             
-            return "Approved" if prediction == 1 else "Disapproved"
+            return "approved" if prediction == 1 else "disapproved"
         
         except Exception as e:
             argspec = inspect.getfullargspec(self.predict_student_approval)
@@ -83,18 +84,6 @@ class ApprovalSampleAddService(ApprovalSampleAddServiceInterface):
         session_answers = self.get_repository.finished_session_students_answers(
             assessment_id, question_index_assessed, assessment_last_question_index
         )
-
-        print("Answers: ")
-        print(len(session_answers))
-        
-        for answer in session_answers:
-            print("-" * 50)
-            print(answer.to_dict())
-            print("-" * 50)
-        
-        print("question_index_assessed: ")
-        print(question_index_assessed)
-
         
         if not session_answers.exists():
             raise Exception(f'No se encontraron respuesta para procesar.')
@@ -102,9 +91,6 @@ class ApprovalSampleAddService(ApprovalSampleAddServiceInterface):
         session_students = {}
         for answer in session_answers:
             session_students.setdefault(answer.sessionStudent_id, answer.sessionStudent.grade)
-
-        print("session_students size:")
-        print(len(session_students))
         
         for session_student_id, grade in session_students.items():
             student_answers = session_answers.filter(sessionStudent_id=session_student_id)
@@ -121,15 +107,27 @@ class ApprovalSampleAddService(ApprovalSampleAddServiceInterface):
         try:
             df = self.get_training_data(assessment_id, iteration)
             X = df.drop(columns=['isApproved'])
+            X = X[['luminosity', 'noiseLevel', 'correctAnswers']]
+            X['correctAnswers'] *= 100
             y = df['isApproved']
-            X['correctAnswers'] *= 60
 
             scaler = StandardScaler()
             X_scaled = scaler.fit_transform(X)
             X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42, stratify=y)
             
-            model = LogisticRegression()
+            #model = LogisticRegression()
+            model = LogisticRegression(class_weight={0: 30, 1: 1})
             model.fit(X_train, y_train)
+
+
+            print("PPPPPPPPPPPPPPPPPPPP")
+            #feature_names = ["bandwidth", "luminosity", "noiseLevel", "correctAnswers"]
+            feature_names = ["luminosity", "noiseLevel", "correctAnswers"]
+            importance = model.coef_[0]  # Get the learned weights
+
+            for name, coef in zip(feature_names, importance):
+                print(f"Feature: {name}, Weight: {coef:.3f}")
+
             
             model_dir = "ai_models"
             os.makedirs(model_dir, exist_ok=True)
@@ -184,16 +182,20 @@ class ApprovalSampleAddService(ApprovalSampleAddServiceInterface):
         ).values(
             'isApproved', 'bandwidth', 'luminosity', 'noiseLevel', 'correctAnswers', 'elapsedTime'
         )
-        """
+
         # TMP Remove elapse_time
         results = ApprovalSample.objects.filter(
             assessment_id=assessment_id, iteration=iteration, isPredicted=False
         ).values(
             'isApproved', 'bandwidth', 'luminosity', 'noiseLevel', 'correctAnswers'
         )
-
-        print('Samples:')
-        print(len(results))
+        """
+        # TMP Remove bandwith test
+        results = ApprovalSample.objects.filter(
+            assessment_id=assessment_id, iteration=iteration, isPredicted=False
+        ).values(
+            'isApproved', 'luminosity', 'noiseLevel', 'correctAnswers'
+        )
         
         df = pd.DataFrame(results)
         df['isApproved'] = df['isApproved'].astype(int)
@@ -204,14 +206,9 @@ class ApprovalSampleAddService(ApprovalSampleAddServiceInterface):
     def get_normalized_student_answers(
         self, session_student_id, question_index_assessed
     ):
-        student_answers = self.get_repository.finished_session_student_answers(
+        student_answers = self.get_repository.student_answers_from_index(
             session_student_id, question_index_assessed
         )
-
-        print("Answers single: ")
-        print(len(student_answers))
-        print("question_index_assessed single: ")
-        print(question_index_assessed)
 
         if not student_answers.exists():
             raise Exception(f'No se encontraron respuesta para procesar.')

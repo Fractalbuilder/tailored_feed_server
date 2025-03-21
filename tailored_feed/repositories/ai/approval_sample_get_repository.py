@@ -27,7 +27,7 @@ class ApprovalSampleGetRepository(ApprovalSampleGetRepositoryInterface):
             self.exception_manager.throw_report(self, "finished_session_students_answers", parameters, str(e))
 
     
-    def finished_session_student_answers(
+    def student_answers_from_index(
         self, session_student_id, question_index_assessed
     ):
         try:
@@ -37,6 +37,6 @@ class ApprovalSampleGetRepository(ApprovalSampleGetRepositoryInterface):
             )
 
         except Exception as e:
-            argspec = inspect.getfullargspec(self.finished_session_student_answers)
+            argspec = inspect.getfullargspec(self.student_answers_from_index)
             parameters = {name: value for name, value in locals().copy().items() if name in argspec.args and name != 'self'}
-            self.exception_manager.throw_report(self, "finished_session_student_answers", parameters, str(e))
+            self.exception_manager.throw_report(self, "student_answers_from_index", parameters, str(e))

@@ -9,7 +9,7 @@ class ApprovalSampleGetRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def finished_session_student_answers(
+    def student_answers_from_index(
         self, session_student_id, question_index_assessed, assessment_last_question_index
     ):
         pass

@@ -36,3 +36,11 @@ class DashboardConsumer(AsyncWebsocketConsumer):
             "assistants_in_process": event["assistants_in_process"],
             "assistants_finished": event["assistants_finished"],
         }))
+
+
+    async def send_at_risk_students(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "update_at_risk_students",
+            "session_id": event["session_id"],
+            "students": event["students"]
+        }))

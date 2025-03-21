@@ -44,7 +44,9 @@
                 {% endif %}
                 <p class="common-text"><b>Nombre sesión:</b> {{ session.name }} </p>
                 <p class="common-text"><b>Nombre evaluación:</b> {{ context.assessment.name }} </p>
-                <p class="common-text"><b>Fecha inicio:</b> {{ session.startDate }} </p>
+                {% if session.startDate %}
+                    <p class="common-text"><b>Fecha inicio:</b> {{ session.startDate }} </p>
+                {% endif %}
                 <p class="common-text"><b>Total preguntas:</b> {{ context.assessment.total_questions }} </p>
                 <p class="common-text"><b>Estado:</b> <span id="session-state" data-state="{{ session.state }}"></span></p>
             </div>
@@ -79,7 +81,7 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Código SIMCA</th>
+                                    <th>Número Identificación</th>
                                     <th>Usuario</th>
                                     <th>Aciertos</th>
                                     <th>Nota (%)</th>
@@ -100,8 +102,22 @@
                         <p class="common-text">Ningún estudiante participó en la sesión</p>
                     {% endif %}
                 {% elif session.state == 'in_process' %}
-                    <h3>Estudiantes con Menor Rendimiento</h3>
-                    <p class="common-text">No hay datos aún</p>
+                    <h3 id="at-risk-title" style="display: none;">Estudiantes en Riesgo</h3>
+                    <table id="at-risk-table" style="display: none;">
+                        <colgroup>
+                            <col style="width: 40%;">
+                            <col style="width: 40%;">
+                            <col style="width: 20%;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Número Identificación</th>
+                                <th>Usuario</th>
+                                <th>Aciertos</th>
+                            </tr>
+                        </thead>
+                        <tbody id="at-risk-body"></tbody>
+                    </table>
                 {% endif %}
             </div>
         </div>
@@ -128,8 +144,33 @@
                             .getElementById('assistants-finished-value');
                         
                         assistantsFinishedElement.textContent = `${data.assistants_finished}`;
+                    } else if (type == "update_at_risk_students") {
+                        console.log("Students at risk")
+                        const atRiskTable = document.getElementById('at-risk-table');
+                        const atRiskTitle = document.getElementById('at-risk-title');
+                        const atRiskBody = document.getElementById('at-risk-body');
+
+                        // Clear existing rows
+                        atRiskBody.innerHTML = "";
+
+                        if (data.students.length > 0) {
+                            data.students.forEach(student => {
+                                let row = `<tr>
+                                    <td>${student.student__externalId}</td>
+                                    <td>${student.student__username}</td>
+                                    <td>${student.correctAnswers}</td>
+                                </tr>`;
+                                atRiskBody.innerHTML += row;
+                            });
+
+                            // Show table only if records exist
+                            atRiskTitle.style.display = "block";
+                            atRiskTable.style.display = "block";
+                        } else {
+                            atRiskTitle.style.display = "none";
+                            atRiskTable.style.display = "none";
+                        }
                     }
-                    
                 }
             };
 

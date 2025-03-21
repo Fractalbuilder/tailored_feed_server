@@ -1,5 +1,7 @@
 import inspect
 import numpy as np
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 from tailored_feed.services.common.exception_manager import ExceptionManager
 from tailored_feed.models.session.session_student import SessionStudent
 from tailored_feed.models.session.session_answer import SessionAnswer
@@ -11,6 +13,7 @@ class SessionAnswerHandleService(SessionAnswerHandleServiceInterface):
         self, session_get_service, user_get_service, session_student_add_service, 
         session_answer_add_service, question_get_service, approval_sample_add_service
     ):
+        self.channel_layer = get_channel_layer()
         self.exception_manager = ExceptionManager()
         self.session_get_service = session_get_service
         self.user_get_service = user_get_service
@@ -50,9 +53,15 @@ class SessionAnswerHandleService(SessionAnswerHandleServiceInterface):
                 is_correct=is_correct
             )
 
-            self.predict_student_approval(
+            prediction = self.predict_student_approval(
                 session, session_student.id, current_question_index, assessment_last_question_index
             )
+
+            if prediction:
+                session_student.approvalPrediction = prediction
+                session_student.save()
+
+                self.notify_students_at_risk(session_id)
 
             return session_answer
             
@@ -63,19 +72,51 @@ class SessionAnswerHandleService(SessionAnswerHandleServiceInterface):
 
 
     def predict_student_approval(
-        self, session, session_student_id, question_index_assessed, assessment_last_question_index
+        self, session, session_student_id, current_question_index, assessment_last_question_index
     ):
         if session.approvalModelQuestionIndicesAssessed:
             for i in range(len(session.approvalModelQuestionIndicesAssessed) - 1, -1, -1):
-                if  question_index_assessed >= session.approvalModelQuestionIndicesAssessed[i]:
-                    print("handle. approvalModelIteration: ")
+                iteration_index_assessed = session.approvalModelQuestionIndicesAssessed[i]
+
+                if  current_question_index >= iteration_index_assessed:
+                    print("Predicting...")
+                    print("Index assessed")
+                    print(iteration_index_assessed)
+                    print("Iteration")
                     print(i)
 
                     print("**** HANDLE PREDICTION ****")
                     prediction = self.approval_sample_add_service.predict_student_approval(
                         session.assessment_id, session.id, session_student_id, 
-                        question_index_assessed, i, assessment_last_question_index
+                        iteration_index_assessed, i, assessment_last_question_index
                     )
                     print(prediction)
                     
-                    return
+                    return prediction
+        
+        return None
+
+
+    def notify_students_at_risk(self, session_id):
+        channel_layer = get_channel_layer()
+
+        # Fetch students who are "disapproved"
+        students_in_risk = (
+            SessionStudent.objects
+            .filter(session_id=session_id, approvalPrediction="disapproved")
+            .select_related("student")  # Join with User table
+            .values("id", "student__id", "student__username", "student__externalId", "correctAnswers")
+            .order_by("student__externalId")
+        )
+
+        students_list = list(students_in_risk)
+
+        # Send data to the WebSocket group
+        async_to_sync(self.channel_layer.group_send)(
+            f"session_{session_id}_db",
+            {
+                "type": "send_at_risk_students",
+                "session_id": str(session_id),
+                "students": students_list
+            }
+        )
